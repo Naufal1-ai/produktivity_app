@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "511628765064",
-    "project_id": "keuangan-pribadi-2df3e",
-    "storage_bucket": "keuangan-pribadi-2df3e.firebasestorage.app"
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "project_id": "YOUR_PROJECT_ID",
+    "storage_bucket": "YOUR_STORAGE_BUCKET"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:511628765064:android:ce81a98c48bcc1ab38fc3d",
+        "mobilesdk_app_id": "YOUR_MOBILE_SDK_APP_ID",
         "android_client_info": {
           "package_name": "com.naufal.keuanganapp"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB83HaYH_B5ucaKlcTP5FI1Lyy7oZoM4GU"
+          "current_key": "YOUR_ANDROID_API_KEY"
         }
       ],
       "services": {

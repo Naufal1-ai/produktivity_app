@@ -1,4 +1,3 @@
-
 # Produktivity & Keuangan App
 
 Aplikasi berbasis Flutter yang dirancang untuk membantu pengguna mengelola keuangan pribadi sekaligus meningkatkan produktivitas harian dalam satu platform yang terintegrasi.
@@ -9,9 +8,10 @@ Aplikasi berbasis Flutter yang dirancang untuk membantu pengguna mengelola keuan
 * **Pencatatan Transaksi:** Catat pemasukan dan pengeluaran harian dengan mudah.
 * **Kategori Kustom:** Pengelompokan transaksi berdasarkan kategori (makanan, edukasi, investasi, dll).
 * **Laporan Keuangan:** Visualisasi data pengeluaran dan pemasukan menggunakan grafik yang interaktif.
+* **Export Data:** Export laporan ke CSV & PDF.
 
 ### ⏱️ Produktivitas
-* **Task Management / To-Do List:** Kelola tugas harian agar tidak ada yang terlewat.
+* **Kanban Board:** Manajemen tugas dengan board visual.
 * **Habit Tracker:** Pantau konsistensi kebiasaan positif Anda setiap hari.
 
 ---
@@ -19,56 +19,88 @@ Aplikasi berbasis Flutter yang dirancang untuk membantu pengguna mengelola keuan
 ## 🛠️ Tech Stack
 
 * **Framework:** [Flutter](https://flutter.dev/) (Dart)
-* **State Management:** *[Isi dengan State Management yang Anda gunakan, contoh: Provider / BLoC / Riverpod]*
-* **Database Lokal:** *[Isi jika menggunakan database, contoh: SQLite / Isar / Hive]*
+* **State Management:** Provider
+* **Backend:** Firebase (Auth, Firestore)
+* **Charts:** fl_chart
 
 ---
 
-## 💻 Cara Menjalankan Project Di Lokal
+## 💻 Cara Menjalankan Project
 
 ### Prasyarat
-Sebelum memulai, pastikan Anda sudah menginstal:
-* Flutter SDK (Versi terbaru disarankan)
+* Flutter SDK >= 3.0.0
 * Android Studio / VS Code
 * Git
+* Firebase Project ([Firebase Console](https://console.firebase.google.com))
 
-### Langkah-Langkah Instalasi
+### 🔐 Firebase Setup (WAJIB)
 
-1. **Clone Repository**
-   ```bash
-   git clone [https://github.com/Naufal1-ai/produktivity_app.git](https://github.com/Naufal1-ai/produktivity_app.git)
-   cd produktivity_app
-Instal Dependencies
-Unduh semua package yang diperlukan yang tertera di pubspec.yaml:
+Project ini **tidak menyertakan file konfigurasi Firebase** demi keamanan. Ikuti langkah berikut:
 
-Bash
+#### 1. Setup `firebase_options.dart`
+
+```bash
+# Copy template file
+cp lib/firebase_options.dart.example lib/firebase_options.dart
+```
+
+Buka `lib/firebase_options.dart` dan isi dengan nilai dari **Firebase Console → Project Settings → Your apps**.
+
+#### 2. Setup `google-services.json` (Android)
+
+```bash
+# Copy template file
+cp android/app/google-services.json.example android/app/google-services.json
+```
+
+Atau download langsung dari **Firebase Console → Project Settings → Your apps → Android → Download google-services.json**.
+
+#### 3. (Opsional) Setup iOS
+
+Download `GoogleService-Info.plist` dari Firebase Console dan letakkan di `ios/Runner/`.
+
+### ▶️ Jalankan Aplikasi
+
+```bash
 flutter pub get
-Jalankan Aplikasi
-Pastikan emulator atau perangkat fisik Anda sudah terhubung, lalu jalankan perintah:
-
-Bash
 flutter run
-📁 Struktur Folder (Opsional)
-Plaintext
-lib/
-│
-├── main.dart
-├── core/          # Konfigurasi tema, utilitas, dan konstanta global
-├── data/          # Model, penyedia data (API/Database local)
-├── presentation/  # UI (Screen, Widget) dan State Management/Logic
-└── business_logic/# (Jika memisahkan logic bisnis secara eksplisit)
-👤 Kontributor
-Naufal - Naufal1-ai
+```
 
-📄 Lisensi
+---
+
+## 📁 Struktur Project
+
+```
+lib/
+├── data/              # Data layer (models, repositories)
+├── presentation/      # UI layer
+│   ├── screens/       # Halaman-halaman app
+│   └── widgets/       # Reusable widgets
+├── firebase_options.dart   # ⚠️ Tidak di-commit (berisi API key)
+└── main.dart
+```
+
+## ⚠️ Catatan Keamanan
+
+File-file berikut **TIDAK di-commit** ke repository karena berisi API key:
+- `lib/firebase_options.dart`
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+
+Gunakan file `.example` sebagai template untuk setup.
+
+---
+
+## 👤 Kontributor
+
+* **Naufal** - [Naufal1-ai](https://github.com/Naufal1-ai)
+
+## 📄 Lisensi
+
 Project ini dilisensikan di bawah MIT License.
 
+## 📚 Resources
 
-### Cara Memasukkannya ke GitHub Anda:
-1. Buat file baru bernama `README.md` di root folder project Anda (`E:\project flutter\keuangan_app\README.md`).
-2. Copy-paste teks markdown di atas ke dalam file tersebut, lalu sesuaikan bagian Tech Stack (State Management/Database) jika diperlukan.
-3. Jalankan perintah berikut di terminal Anda untuk melakukan push ke GitHub:
-   ```bash
-   git add README.md
-   git commit -m "add README.md"
-   git push origin main
+- [Flutter Documentation](https://docs.flutter.dev/)
+- [Firebase for Flutter](https://firebase.google.com/docs/flutter/setup)
+- [FlutterFire Overview](https://firebase.flutter.dev/)

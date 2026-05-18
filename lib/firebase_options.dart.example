@@ -1,0 +1,51 @@
+// ===========================================
+// 📋 TEMPLATE - Firebase Options
+// ===========================================
+// 
+// Copy this file as 'firebase_options.dart' in the same directory
+// and replace the placeholder values with your actual Firebase config.
+//
+// You can find these values in your Firebase Console:
+// https://console.firebase.google.com → Project Settings
+//
+// Steps:
+// 1. Copy this file: cp firebase_options.dart.example firebase_options.dart
+// 2. Go to Firebase Console → Your Project → Project Settings
+// 3. Copy the config values for each platform
+// 4. Replace the placeholder values below
+//
+
+import 'dart:io' show Platform;
+
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+
+class DefaultFirebaseOptions {
+  static FirebaseOptions get currentPlatform {
+    if (kIsWeb) {
+      return web;
+    }
+    if (Platform.isAndroid) {
+      return android;
+    }
+    throw UnsupportedError('This platform is not yet supported.');
+  }
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'YOUR_ANDROID_API_KEY',
+    appId: 'YOUR_ANDROID_APP_ID',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_STORAGE_BUCKET',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'YOUR_WEB_API_KEY',
+    authDomain: 'YOUR_AUTH_DOMAIN',
+    projectId: 'YOUR_PROJECT_ID',
+    storageBucket: 'YOUR_STORAGE_BUCKET',
+    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
+    appId: 'YOUR_WEB_APP_ID',
+    measurementId: 'YOUR_MEASUREMENT_ID',
+  );
+}
