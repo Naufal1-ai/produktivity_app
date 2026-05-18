@@ -1,0 +1,569 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:productivity/core/theme/app_theme.dart';
+import 'package:productivity/presentation/widgets/glass_container.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:productivity/services/settings_service.dart';
+import 'package:productivity/presentation/screens/settings/edit_profile_screen.dart';
+import 'package:productivity/presentation/screens/settings/support_screen.dart';
+import 'package:productivity/presentation/screens/settings/pin_setup_screen.dart';
+import 'package:productivity/presentation/screens/settings/theme_color_screen.dart';
+import 'package:productivity/presentation/screens/settings/language_screen.dart';
+import 'package:productivity/presentation/screens/settings/export_screen.dart';
+
+class SettingsScreen extends StatefulWidget {
+  final VoidCallback onToggleTheme;
+  final bool isDarkMode;
+
+  const SettingsScreen({
+    super.key,
+    required this.onToggleTheme,
+    required this.isDarkMode,
+  });
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final User? _user = FirebaseAuth.instance.currentUser;
+  late SettingsService _settingsService;
+  bool _dailyReminder = false;
+  bool _weeklyReminder = false;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _settingsService = SettingsService();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    await _settingsService.init();
+    if (!mounted) return;
+    setState(() {
+      _dailyReminder = _settingsService.dailyReminder;
+      _weeklyReminder = _settingsService.weeklyReminder;
+      _isInitialized = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    if (!_isInitialized) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.settings),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          foregroundColor: AppColors.textPrimary,
+        ),
+        body: const SafeArea(
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.settings),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: AppColors.textPrimary,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Profil',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.blueMid,
+                                AppColors.blueAccent,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color:
+                                    AppColors.blueAccent.withValues(alpha: 0.2),
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 30,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _user?.displayName ?? 'Pengguna',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                _user?.email ?? '',
+                                style: TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditProfileScreen(
+                                  onToggleTheme: widget.onToggleTheme,
+                                  isDarkMode: widget.isDarkMode,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.edit,
+                            color: AppColors.blueAccent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Appearance Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tampilan',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: widget.isDarkMode
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
+                      title: widget.isDarkMode ? 'Mode Terang' : 'Mode Gelap',
+                      subtitle: 'Ubah tema aplikasi',
+                      onTap: widget.onToggleTheme,
+                      trailing: Switch(
+                        value: widget.isDarkMode,
+                        onChanged: (_) => widget.onToggleTheme(),
+                        activeColor: AppColors.blueAccent,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingsItem(
+                      icon: Icons.palette_outlined,
+                      title: 'Warna Tema',
+                      subtitle: 'Pilih aksen warna Productivity',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ThemeColorScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                      trailing: Container(
+                        width: 34,
+                        height: 34,
+                        decoration: BoxDecoration(
+                          color: AppColors.blueAccent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.borderAccent,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Notifications Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Notifikasi',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.notifications,
+                      title: 'Pengingat Harian',
+                      subtitle: 'Aktifkan pengingat transaksi harian',
+                      onTap: () {},
+                      trailing: Switch(
+                        value: _dailyReminder,
+                        onChanged: (value) {
+                          setState(() {
+                            _dailyReminder = value;
+                            _settingsService.dailyReminder = value;
+                          });
+                        },
+                        activeColor: AppColors.blueAccent,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingsItem(
+                      icon: Icons.notifications_active,
+                      title: 'Pengingat Mingguan',
+                      subtitle: 'Aktifkan pengingat ringkasan mingguan',
+                      onTap: () {},
+                      trailing: Switch(
+                        value: _weeklyReminder,
+                        onChanged: (value) {
+                          setState(() {
+                            _weeklyReminder = value;
+                            _settingsService.weeklyReminder = value;
+                          });
+                        },
+                        activeColor: AppColors.blueAccent,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Security Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Keamanan',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.lock,
+                      title: 'PIN Aplikasi',
+                      subtitle: 'Aktifkan PIN untuk membuka aplikasi',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PinSetupScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Backup & Export Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Backup & Export',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.backup,
+                      title: 'Backup Data',
+                      subtitle: 'Backup data ke cloud',
+                      onTap: () {},
+                    ),
+                    const SizedBox(height: 8),
+                    _SettingsItem(
+                      icon: Icons.download,
+                      title: 'Export Data',
+                      subtitle: 'Export data dalam format CSV/PDF',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ExportScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Language Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bahasa',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.language,
+                      title: 'Bahasa Aplikasi',
+                      subtitle: 'Pilih bahasa yang digunakan',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => LanguageScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Support Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Bantuan',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.help_outline,
+                      title: 'FAQ & Bantuan',
+                      subtitle: 'Pertanyaan umum dan dukungan',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => SupportScreen(
+                              onToggleTheme: widget.onToggleTheme,
+                              isDarkMode: widget.isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Account Section
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Akun',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.logout,
+                      title: 'Keluar',
+                      subtitle: 'Keluar dari akun Anda',
+                      onTap: () async {
+                        final navigator = Navigator.of(context);
+                        await FirebaseAuth.instance.signOut();
+                        if (!mounted) return;
+                        navigator.pushReplacementNamed('/');
+                      },
+                      textColor: AppColors.expense,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // App Info
+              GlassContainer(
+                borderRadius: 16,
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tentang Aplikasi',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SettingsItem(
+                      icon: Icons.info_outline,
+                      title: 'Versi 1.0.0',
+                      subtitle: 'Dibuat oleh Naufal Khalil Aldeza',
+                      onTap: () {},
+                      showArrow: false,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final Widget? trailing;
+  final Color? textColor;
+  final bool showArrow;
+
+  const _SettingsItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.trailing,
+    this.textColor,
+    this.showArrow = true,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.blueAccent.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: textColor ?? AppColors.blueAccent,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: textColor ?? AppColors.textPrimary,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: AppColors.textMuted,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (trailing != null) trailing!,
+            if (showArrow && trailing == null)
+              Icon(
+                Icons.chevron_right,
+                color: AppColors.textMuted,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
