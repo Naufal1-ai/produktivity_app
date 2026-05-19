@@ -166,7 +166,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: AppColors.blueAccent.withOpacity(0.1),
+                            color: AppColors.blueAccent.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Icon(

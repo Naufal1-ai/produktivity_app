@@ -10,7 +10,8 @@ import 'package:productivity/presentation/screens/kanban/kanban_board_screen.dar
 import 'package:productivity/presentation/screens/pomodoro/pomodoro_timer_screen.dart';
 import 'package:productivity/presentation/screens/habit_tracker/habit_tracker_screen.dart';
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
-import 'package:productivity/presentation/widgets/lending_screen.dart';
+import 'package:productivity/presentation/screens/lending/lending_screen.dart';
+import 'package:productivity/presentation/screens/vehicle_service/vehicle_service_screen.dart';
 
 /// Shell utama yang meng-host BottomNavigationBar + 5 tab
 class MainShell extends StatefulWidget {
@@ -48,12 +49,13 @@ class _MainShellState extends State<MainShell> {
         isDarkMode: widget.isDarkMode,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
-      const FinanceScreen(),
-      const TasksScreen(),
-      const KanbanBoardScreen(),
-      const PomodoroTimerScreen(),
-      const HabitTrackerScreen(),
-      const LendingScreen(),
+      FinanceScreen(),
+      TasksScreen(),
+      KanbanBoardScreen(),
+      PomodoroTimerScreen(),
+      HabitTrackerScreen(),
+      LendingScreen(),
+      VehicleServiceScreen(),
       SettingsScreen(
         onToggleTheme: widget.onToggleTheme,
         isDarkMode: widget.isDarkMode,
@@ -142,24 +144,6 @@ class _MainShellState extends State<MainShell> {
                             },
                           ),
                           _DrawerItem(
-                            icon: Icons.bar_chart_outlined,
-                            title: 'Statistik',
-                            isActive: _currentIndex == 1,
-                            onTap: () {
-                              Navigator.pop(context);
-                              setState(() => _currentIndex = 1);
-                            },
-                          ),
-                          _DrawerItem(
-                            icon: Icons.account_balance_wallet_outlined,
-                            title: 'Anggaran',
-                            isActive: _currentIndex == 2,
-                            onTap: () {
-                              Navigator.pop(context);
-                              setState(() => _currentIndex = 2);
-                            },
-                          ),
-                          _DrawerItem(
                             icon: Icons.pie_chart_outline,
                             title: 'Keuangan',
                             isActive: _currentIndex == 1,
@@ -180,23 +164,28 @@ class _MainShellState extends State<MainShell> {
                           _DrawerItem(
                             icon: Icons.inventory_2_outlined,
                             title: 'Peminjaman',
+                            isActive: _currentIndex == 6,
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const LendingScreen(),
-                                ),
-                              );
+                              setState(() => _currentIndex = 6);
                             },
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Colors.white10),
+                          _DrawerItem(
+                            icon: Icons.two_wheeler_outlined,
+                            title: 'Servis Motor',
+                            isActive: _currentIndex == 7,
+                            onTap: () {
+                              Navigator.pop(context);
+                              setState(() => _currentIndex = 7);
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Divider(color: AppColors.isDark ? Colors.white10 : AppColors.border),
                           ),
                           // Productivity Features Section
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 8,
                             ),
@@ -205,7 +194,7 @@ class _MainShellState extends State<MainShell> {
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white70,
+                                color: AppColors.textMuted,
                                 letterSpacing: 1,
                               ),
                             ),
@@ -213,60 +202,41 @@ class _MainShellState extends State<MainShell> {
                           _DrawerItem(
                             icon: Icons.dashboard_customize_outlined,
                             title: 'Kanban Board',
+                            isActive: _currentIndex == 3,
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const KanbanBoardScreen(),
-                                ),
-                              );
+                              setState(() => _currentIndex = 3);
                             },
                           ),
                           _DrawerItem(
                             icon: Icons.schedule_outlined,
                             title: 'Pomodoro Timer',
+                            isActive: _currentIndex == 4,
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const PomodoroTimerScreen(),
-                                ),
-                              );
+                              setState(() => _currentIndex = 4);
                             },
                           ),
                           _DrawerItem(
                             icon: Icons.favorite_outline,
                             title: 'Habit Tracker',
+                            isActive: _currentIndex == 5,
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const HabitTrackerScreen(),
-                                ),
-                              );
+                              setState(() => _currentIndex = 5);
                             },
                           ),
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: Colors.white10),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Divider(color: AppColors.isDark ? Colors.white10 : AppColors.border),
                           ),
                           _DrawerItem(
                             icon: Icons.settings_outlined,
                             title: 'Pengaturan',
+                            isActive: _currentIndex == 8,
                             onTap: () {
                               Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SettingsScreen(
-                                    onToggleTheme: widget.onToggleTheme,
-                                    isDarkMode: widget.isDarkMode,
-                                  ),
-                                ),
-                              );
+                              setState(() => _currentIndex = 8);
                             },
                           ),
                         ],
@@ -282,10 +252,7 @@ class _MainShellState extends State<MainShell> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () async {
-                                final navigator = Navigator.of(context);
                                 await FirebaseAuth.instance.signOut();
-                                if (!mounted) return;
-                                navigator.pushReplacementNamed('/');
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.expense,
@@ -597,6 +564,34 @@ class _SideNav extends StatelessWidget {
               ),
             ),
           ),
+          // Vehicle Service
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Tooltip(
+              message: 'Servis Motor',
+              child: GestureDetector(
+                onTap: () => onTap(7),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: currentIndex == 7
+                        ? AppColors.primaryWeb.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    Icons.two_wheeler_outlined,
+                    color: currentIndex == 7
+                        ? AppColors.primaryWeb
+                        : AppColors.textDim,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
           const Spacer(),
           IconButton(
             icon: Icon(
@@ -660,6 +655,10 @@ class _BottomNav extends StatelessWidget {
         icon: Icons.inventory_2_outlined,
         activeIcon: Icons.inventory_2,
         label: 'Dipinjam'),
+    _NavItem(
+        icon: Icons.two_wheeler_outlined,
+        activeIcon: Icons.two_wheeler,
+        label: 'Servis'),
   ];
 
   @override

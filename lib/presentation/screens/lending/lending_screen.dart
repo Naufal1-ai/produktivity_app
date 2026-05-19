@@ -112,7 +112,7 @@ class _LendingScreenState extends State<LendingScreen> {
                             const SizedBox(height: 8),
                             Text(
                               '${snapshot.error}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                   color: AppColors.expense, fontSize: 12),
                               textAlign: TextAlign.center,
                             ),

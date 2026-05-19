@@ -46,9 +46,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   borderRadius: 18,
                   color:
-                      AppColors.isDark ? null : Colors.white.withOpacity(0.75),
+                      AppColors.isDark ? null : Colors.white.withValues(alpha: 0.75),
                   border:
-                      Border.all(color: AppColors.blueAccent.withOpacity(0.15)),
+                      Border.all(color: AppColors.blueAccent.withValues(alpha: 0.15)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -395,7 +395,7 @@ class _BudgetTile extends StatelessWidget {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(16),
           borderRadius: 18,
-          color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
+          color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
           border: Border.all(
             color: isOver
                 ? AppColors.expense.withValues(alpha: 0.4)
@@ -486,7 +486,7 @@ class _UnbudgetedTile extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         borderRadius: 18,
-        color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
+        color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
         border:
             Border.all(color: AppColors.borderAccent, style: BorderStyle.solid),
         child: Row(

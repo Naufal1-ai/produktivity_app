@@ -10,7 +10,7 @@ import 'package:productivity/data/models/transaction_model.dart';
 import 'package:productivity/data/repositories/transaction_repository.dart';
 import 'package:productivity/data/models/lending_model.dart';
 import 'package:productivity/data/repositories/lending_repository.dart';
-import 'package:productivity/presentation/widgets/lending_screen.dart';
+import 'package:productivity/presentation/screens/lending/lending_screen.dart';
 import 'package:productivity/presentation/widgets/common_widgets.dart';
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
 import 'package:productivity/presentation/widgets/grid_background.dart';

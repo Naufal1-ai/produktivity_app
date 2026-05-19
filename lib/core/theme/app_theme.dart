@@ -28,18 +28,14 @@ class AppColors {
   static Color get primaryWeb => brand;
 
   // Text
-  static Color get textPrimary => isDark
-      ? const Color.fromARGB(255, 166, 171, 180)
-      : const Color(0xFF94A3B8);
-  static Color get textSecondary => isDark
-      ? const Color.fromARGB(255, 166, 171, 180)
-      : const Color(0xFF94A3B8);
-  static Color get textMuted => isDark
-      ? const Color.fromARGB(255, 166, 171, 180)
-      : const Color(0xFF94A3B8);
-  static Color get textDim => isDark
-      ? const Color.fromARGB(255, 166, 171, 180)
-      : const Color(0xFF94A3B8);
+  static Color get textPrimary =>
+      isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  static Color get textSecondary =>
+      isDark ? const Color(0xFFA6ABB4) : const Color(0xFF334155);
+  static Color get textMuted =>
+      isDark ? const Color(0xFF6B7280) : const Color(0xFF64748B);
+  static Color get textDim =>
+      isDark ? const Color(0xFF4B5563) : const Color(0xFF94A3B8);
 
   // Semantic
   static const income = Color(0xFF10B981); // Success Green

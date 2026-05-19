@@ -91,7 +91,9 @@ class _StatChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.black.withValues(alpha: 0.2),
+          color: AppColors.isDark
+              ? Colors.black.withValues(alpha: 0.2)
+              : Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -203,8 +205,8 @@ class TransactionTile extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   color: tx.isIncome
-                      ? AppColors.blueDark
-                      : const Color(0xFF1F0E0E),
+                      ? (AppColors.isDark ? AppColors.blueDark : AppColors.blueAccent.withValues(alpha: 0.12))
+                      : (AppColors.isDark ? const Color(0xFF1F0E0E) : AppColors.expense.withValues(alpha: 0.1)),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(

@@ -46,13 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('remember_me', _rememberMe);
-
-      if (mounted) Navigator.pushReplacementNamed(context, '/home');
     } on FirebaseAuthException catch (e) {
       setState(() {
         _error = switch (e.code) {
           'user-not-found' => 'Email tidak ditemukan',
           'wrong-password' => 'Password salah',
+          'invalid-credential' => 'Email atau password salah',
           'email-already-in-use' => 'Email sudah terdaftar',
           'weak-password' => 'Password minimal 6 karakter',
           'invalid-email' => 'Format email tidak valid',
@@ -84,8 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('remember_me', _rememberMe);
-
-      if (mounted) Navigator.pushReplacementNamed(context, '/home');
     } catch (_) {
       setState(() => _error = 'Gagal masuk dengan Google');
     } finally {

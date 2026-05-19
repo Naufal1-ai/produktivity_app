@@ -311,8 +311,11 @@ class _TasksScreenState extends State<TasksScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color:
-                  selected ? Colors.white : Colors.white.withValues(alpha: 0.5),
+              color: selected
+                  ? Colors.white
+                  : (AppColors.isDark
+                      ? Colors.white.withValues(alpha: 0.6)
+                      : AppColors.textSecondary),
               fontSize: 13,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
             ),

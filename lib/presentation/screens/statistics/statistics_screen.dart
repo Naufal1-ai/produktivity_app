@@ -75,9 +75,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                       const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   borderRadius: 16,
                   color:
-                      AppColors.isDark ? null : Colors.white.withOpacity(0.75),
+                      AppColors.isDark ? null : Colors.white.withValues(alpha: 0.75),
                   border:
-                      Border.all(color: AppColors.blueAccent.withOpacity(0.15)),
+                      Border.all(color: AppColors.blueAccent.withValues(alpha: 0.15)),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -101,8 +101,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         GlassContainer(
           margin: const EdgeInsets.symmetric(horizontal: 16),
           borderRadius: 18,
-          color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
-          border: Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+          color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
+          border: Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
           child: TabBar(
             controller: _tabController,
             indicator: BoxDecoration(
@@ -112,7 +112,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             ),
             indicatorSize: TabBarIndicatorSize.tab,
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+            unselectedLabelColor: AppColors.isDark
+                ? Colors.white.withValues(alpha: 0.6)
+                : AppColors.textSecondary,
             labelStyle:
                 const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
             dividerColor: Colors.transparent,
@@ -170,8 +172,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
           GlassContainer(
             padding: const EdgeInsets.all(16),
             borderRadius: 24,
-            color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
-            border: Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+            color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
+            border: Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
             child: Column(
               children: [
                 SizedBox(
@@ -241,8 +243,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               borderRadius: 18,
-              color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
-              border: Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+              color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
+              border: Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
               child: Row(
                 children: [
                   Container(
@@ -321,9 +323,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               GlassContainer(
                 padding: const EdgeInsets.all(16),
                 borderRadius: 24,
-                color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
+                color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
                 border:
-                    Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+                    Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
                 child: Row(
                   children: [
                     _MiniCard(
@@ -346,9 +348,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               GlassContainer(
                 padding: const EdgeInsets.fromLTRB(8, 20, 12, 12),
                 borderRadius: 18,
-                color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
+                color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
                 border:
-                    Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+                    Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -478,9 +480,9 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               GlassContainer(
                 padding: const EdgeInsets.all(16),
                 borderRadius: 18,
-                color: AppColors.isDark ? null : Colors.white.withOpacity(0.72),
+                color: AppColors.isDark ? null : Colors.white.withValues(alpha: 0.72),
                 border:
-                    Border.all(color: AppColors.blueAccent.withOpacity(0.12)),
+                    Border.all(color: AppColors.blueAccent.withValues(alpha: 0.12)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

@@ -15,7 +15,9 @@ import 'package:productivity/providers/localization_provider.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:productivity/providers/pomodoro_provider.dart';
 import 'package:productivity/providers/habit_tracker_provider.dart';
+import 'package:productivity/providers/vehicle_service_provider.dart';
 import 'package:productivity/services/notification_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 // Satu sumber kebenaran untuk dark mode
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
@@ -23,6 +25,7 @@ final themeColorNotifier = ValueNotifier<Color>(const Color(0xFF4F46E5));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await initializeDateFormatting('id_ID', null);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -68,6 +71,9 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(
           create: (_) => HabitTrackerProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => VehicleServiceProvider(),
+        ),
       ],
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: themeNotifier,
@@ -111,17 +117,6 @@ class MyApp extends StatelessWidget {
                   return const LoginScreen();
                 },
               ),
-              routes: {
-                '/home': (context) => MainShell(
-                      onToggleTheme: () {
-                        themeNotifier.value =
-                            themeNotifier.value == ThemeMode.dark
-                                ? ThemeMode.light
-                                : ThemeMode.dark;
-                      },
-                      isDarkMode: mode == ThemeMode.dark,
-                    ),
-              },
             ),
           ),
         ),

@@ -25,6 +25,7 @@ dependencies:
   printing: ^5.13.3
   flutter_local_notifications: ^17.2.2
   path_provider: ^2.1.3
+  flutter_dotenv: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -35,4 +36,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - .env
 

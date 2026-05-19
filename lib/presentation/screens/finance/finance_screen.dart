@@ -70,7 +70,9 @@ class FinanceScreen extends StatelessWidget {
                       ),
                       indicatorSize: TabBarIndicatorSize.tab,
                       labelColor: Colors.white,
-                      unselectedLabelColor: Colors.white.withValues(alpha: 0.6),
+                      unselectedLabelColor: AppColors.isDark
+                          ? Colors.white.withValues(alpha: 0.6)
+                          : AppColors.textSecondary,
                       labelStyle: const TextStyle(
                           fontSize: 13, fontWeight: FontWeight.w600),
                       unselectedLabelStyle:

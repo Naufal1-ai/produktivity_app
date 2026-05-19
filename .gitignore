@@ -66,3 +66,6 @@ android/key.properties
 
 # IDE local settings
 .vscode/settings.json
+
+# API Keys & Secrets
+lib/core/config/api_keys.dart
