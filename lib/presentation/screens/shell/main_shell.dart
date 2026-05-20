@@ -49,13 +49,13 @@ class _MainShellState extends State<MainShell> {
         isDarkMode: widget.isDarkMode,
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       ),
-      FinanceScreen(),
-      TasksScreen(),
-      KanbanBoardScreen(),
-      PomodoroTimerScreen(),
-      HabitTrackerScreen(),
-      LendingScreen(),
-      VehicleServiceScreen(),
+      const FinanceScreen(),
+      const TasksScreen(),
+      const KanbanBoardScreen(),
+      const PomodoroTimerScreen(),
+      const HabitTrackerScreen(),
+      const LendingScreen(),
+      const VehicleServiceScreen(),
       SettingsScreen(
         onToggleTheme: widget.onToggleTheme,
         isDarkMode: widget.isDarkMode,
@@ -181,7 +181,10 @@ class _MainShellState extends State<MainShell> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: AppColors.isDark ? Colors.white10 : AppColors.border),
+                            child: Divider(
+                                color: AppColors.isDark
+                                    ? Colors.white10
+                                    : AppColors.border),
                           ),
                           // Productivity Features Section
                           Padding(
@@ -228,7 +231,10 @@ class _MainShellState extends State<MainShell> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Divider(color: AppColors.isDark ? Colors.white10 : AppColors.border),
+                            child: Divider(
+                                color: AppColors.isDark
+                                    ? Colors.white10
+                                    : AppColors.border),
                           ),
                           _DrawerItem(
                             icon: Icons.settings_outlined,

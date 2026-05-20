@@ -13,7 +13,8 @@ class VehicleServiceScreen extends StatefulWidget {
 }
 
 class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
-  final _currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+  final _currencyFormat =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
 
   @override
   void initState() {
@@ -37,7 +38,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
     return Scaffold(
       backgroundColor: AppColors.bg,
       appBar: AppBar(
-        title: const Text('Jadwal Servis Motor', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Jadwal Servis Motor',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.bg,
         elevation: 0,
       ),
@@ -58,16 +60,19 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
             itemCount: services.length,
             itemBuilder: (context, index) {
               final service = services[index];
-              final isDue = service.nextServiceDate != null && 
-                            service.nextServiceDate!.isBefore(DateTime.now());
-              
+              final isDue = service.nextServiceDate != null &&
+                  service.nextServiceDate!.isBefore(DateTime.now());
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.bgCard,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: isDue ? Colors.redAccent.withValues(alpha: 0.5) : AppColors.border),
+                  border: Border.all(
+                      color: isDue
+                          ? Colors.redAccent.withValues(alpha: 0.5)
+                          : AppColors.border),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -92,7 +97,7 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                         ),
                         Text(
                           _currencyFormat.format(service.cost),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.expense,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -103,18 +108,21 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 14, color: AppColors.textDim),
+                        Icon(Icons.calendar_today,
+                            size: 14, color: AppColors.textDim),
                         const SizedBox(width: 4),
                         Text(
                           DateFormat('dd MMM yyyy').format(service.date),
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 13),
                         ),
                         const SizedBox(width: 16),
                         Icon(Icons.speed, size: 14, color: AppColors.textDim),
                         const SizedBox(width: 4),
                         Text(
                           '${service.odometer} km',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 13),
                         ),
                       ],
                     ),
@@ -122,29 +130,38 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                       const SizedBox(height: 8),
                       Text(
                         service.notes,
-                        style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        style: TextStyle(
+                            color: AppColors.textSecondary, fontSize: 13),
                       ),
                     ],
                     if (service.nextServiceDate != null) ...[
                       const SizedBox(height: 12),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isDue ? Colors.redAccent.withValues(alpha: 0.1) : AppColors.blueAccent.withValues(alpha: 0.1),
+                          color: isDue
+                              ? Colors.redAccent.withValues(alpha: 0.1)
+                              : AppColors.blueAccent.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.warning_amber_rounded, 
-                              size: 16, 
-                              color: isDue ? Colors.redAccent : AppColors.blueAccent,
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              size: 16,
+                              color: isDue
+                                  ? Colors.redAccent
+                                  : AppColors.blueAccent,
                             ),
                             const SizedBox(width: 8),
                             Text(
                               'Servis Berikutnya: ${DateFormat('dd MMM yyyy').format(service.nextServiceDate!)}',
                               style: TextStyle(
-                                color: isDue ? Colors.redAccent : AppColors.blueAccent,
+                                color: isDue
+                                    ? Colors.redAccent
+                                    : AppColors.blueAccent,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -159,7 +176,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                       children: [
                         TextButton(
                           onPressed: () => _showAddEditDialog(service),
-                          child: Text('Edit', style: TextStyle(color: AppColors.blueAccent)),
+                          child: Text('Edit',
+                              style: TextStyle(color: AppColors.blueAccent)),
                         ),
                         TextButton(
                           onPressed: () {
@@ -167,21 +185,26 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: const Text('Hapus Data'),
-                                content: const Text('Apakah Anda yakin ingin menghapus data servis ini?'),
+                                content: const Text(
+                                    'Apakah Anda yakin ingin menghapus data servis ini?'),
                                 actions: [
-                                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+                                  TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text('Batal')),
                                   TextButton(
                                     onPressed: () {
                                       provider.deleteService(service.id);
                                       Navigator.pop(ctx);
                                     },
-                                    child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                                    child: const Text('Hapus',
+                                        style: TextStyle(color: Colors.red)),
                                   ),
                                 ],
                               ),
                             );
                           },
-                          child: const Text('Hapus', style: TextStyle(color: Colors.redAccent)),
+                          child: const Text('Hapus',
+                              style: TextStyle(color: Colors.redAccent)),
                         ),
                       ],
                     ),
@@ -196,7 +219,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
         onPressed: _showAddEditDialog,
         backgroundColor: AppColors.blueAccent,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Tambah Servis', style: TextStyle(color: Colors.white)),
+        label:
+            const Text('Tambah Servis', style: TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -206,7 +230,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.two_wheeler, size: 80, color: AppColors.textDim.withValues(alpha: 0.5)),
+          Icon(Icons.two_wheeler,
+              size: 80, color: AppColors.textDim.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
           Text(
             'Belum ada riwayat servis.',
@@ -249,12 +274,13 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.service?.title ?? 'Ganti Oli');
+    _titleController =
+        TextEditingController(text: widget.service?.title ?? 'Ganti Oli');
     _notesController = TextEditingController(text: widget.service?.notes ?? '');
     _costController = TextEditingController(
         text: widget.service?.cost.toInt().toString() ?? '');
-    _odometerController = TextEditingController(
-        text: widget.service?.odometer.toString() ?? '');
+    _odometerController =
+        TextEditingController(text: widget.service?.odometer.toString() ?? '');
     _date = widget.service?.date ?? DateTime.now();
     _nextServiceDate = widget.service?.nextServiceDate;
   }
@@ -271,7 +297,9 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
   Future<void> _selectDate(BuildContext context, bool isNext) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: isNext ? (_nextServiceDate ?? DateTime.now().add(const Duration(days: 60))) : _date,
+      initialDate: isNext
+          ? (_nextServiceDate ?? DateTime.now().add(const Duration(days: 60)))
+          : _date,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
@@ -293,7 +321,7 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
 
     try {
       final provider = context.read<VehicleServiceProvider>();
-      
+
       final service = VehicleServiceModel(
         id: widget.service?.id ?? '',
         title: _titleController.text.trim(),
@@ -344,7 +372,9 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                widget.service == null ? 'Tambah Jadwal Servis' : 'Edit Jadwal Servis',
+                widget.service == null
+                    ? 'Tambah Jadwal Servis'
+                    : 'Edit Jadwal Servis',
                 style: TextStyle(
                   color: AppColors.textPrimary,
                   fontSize: 20,
@@ -356,7 +386,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                 controller: _titleController,
                 decoration: InputDecoration(
                   labelText: 'Jenis Servis (Oli, CVT, dll)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   prefixIcon: const Icon(Icons.build),
                 ),
                 validator: (v) => v!.isEmpty ? 'Wajib diisi' : null,
@@ -369,7 +400,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                       controller: _odometerController,
                       decoration: InputDecoration(
                         labelText: 'Kilometer Saat Ini',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         prefixIcon: const Icon(Icons.speed),
                       ),
                       keyboardType: TextInputType.number,
@@ -382,7 +414,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                       controller: _costController,
                       decoration: InputDecoration(
                         labelText: 'Biaya (Rp)',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         prefixIcon: const Icon(Icons.attach_money),
                       ),
                       keyboardType: TextInputType.number,
@@ -398,7 +431,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                     child: InkWell(
                       onTap: () => _selectDate(context, false),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(12),
@@ -407,7 +441,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                           children: [
                             const Icon(Icons.calendar_today, size: 20),
                             const SizedBox(width: 8),
-                            Text('Tanggal: ${DateFormat('dd MMM yyyy').format(_date)}'),
+                            Text(
+                                'Tanggal: ${DateFormat('dd MMM yyyy').format(_date)}'),
                           ],
                         ),
                       ),
@@ -422,14 +457,16 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                     child: InkWell(
                       onTap: () => _selectDate(context, true),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.event_available, size: 20, color: AppColors.blueAccent),
+                            Icon(Icons.event_available,
+                                size: 20, color: AppColors.blueAccent),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -437,7 +474,9 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                                     ? 'Set Jadwal Berikutnya (Opsional)'
                                     : 'Berikutnya: ${DateFormat('dd MMM yyyy').format(_nextServiceDate!)}',
                                 style: TextStyle(
-                                  color: _nextServiceDate == null ? Colors.grey : AppColors.blueAccent,
+                                  color: _nextServiceDate == null
+                                      ? Colors.grey
+                                      : AppColors.blueAccent,
                                 ),
                               ),
                             ),
@@ -458,7 +497,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                 controller: _notesController,
                 decoration: InputDecoration(
                   labelText: 'Catatan tambahan (Opsional)',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   prefixIcon: const Icon(Icons.notes),
                 ),
                 maxLines: 2,
@@ -471,11 +511,20 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.blueAccent,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _isLoading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Simpan', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2))
+                      : const Text('Simpan',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
                 ),
               ),
               const SizedBox(height: 24),

@@ -247,7 +247,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                           const SizedBox(width: 10),
                           Text(
                             '${(progress * 100).toStringAsFixed(0)}%',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.greenSuccess,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,

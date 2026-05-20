@@ -30,7 +30,7 @@ class SettingsService {
 
     _prefs = await SharedPreferences.getInstance();
     _language = _prefs.getString(_languageKey) ?? 'id';
-    _themeColorValue = _prefs.getInt(_themeColorKey) ?? Colors.blue.value;
+    _themeColorValue = _prefs.getInt(_themeColorKey) ?? Colors.blue.toARGB32();
     _dailyReminder = _prefs.getBool(_dailyReminderKey) ?? false;
     _weeklyReminder = _prefs.getBool(_weeklyReminderKey) ?? false;
     _pinEnabled = _prefs.getBool(_pinEnabledKey) ?? false;
@@ -48,7 +48,7 @@ class SettingsService {
   // Theme Color
   Color get themeColor => Color(_themeColorValue);
   set themeColor(Color value) {
-    _themeColorValue = value.value;
+    _themeColorValue = value.toARGB32();
     _prefs.setInt(_themeColorKey, _themeColorValue);
   }
 

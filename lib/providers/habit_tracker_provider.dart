@@ -55,7 +55,7 @@ class HabitTrackerProvider extends ChangeNotifier {
 
   Future<void> logHabitCompletion(String habitId) async {
     try {
-      final habit = _habits.firstWhere((h) => h.id == habitId);
+      _habits.firstWhere((h) => h.id == habitId); // Validate habit exists
       final today = DateTime.now();
 
       final log = HabitLog(

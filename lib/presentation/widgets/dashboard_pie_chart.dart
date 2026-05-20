@@ -69,8 +69,6 @@ class DashboardPieChart extends StatelessWidget {
                             centerSpaceRadius: 40,
                             sections: List.generate(topCategories.length, (i) {
                               final cat = topCategories[i];
-                              final percentage =
-                                  (cat.value / totalExpense) * 100;
                               return PieChartSectionData(
                                 color: colors[i % colors.length],
                                 value: cat.value,

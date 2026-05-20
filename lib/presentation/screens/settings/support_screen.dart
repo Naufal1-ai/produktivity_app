@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SupportScreen extends StatelessWidget {
   final VoidCallback onToggleTheme;
@@ -102,13 +103,19 @@ class SupportScreen extends StatelessWidget {
                       icon: Icons.email,
                       title: 'Email',
                       subtitle: 'support@keuangan-app.com',
-                      onTap: () {
-                        // TODO: Implement email launch
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fitur email akan segera hadir'),
-                          ),
+                      onTap: () async {
+                        final Uri emailLaunchUri = Uri(
+                          scheme: 'mailto',
+                          path: 'support@keuangan-app.com',
                         );
+                        if (!await launchUrl(emailLaunchUri)) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Gagal membuka email klien'),
+                            ),
+                          );
+                        }
                       },
                     ),
                     const SizedBox(height: 12),
@@ -116,13 +123,16 @@ class SupportScreen extends StatelessWidget {
                       icon: Icons.web,
                       title: 'Website',
                       subtitle: 'www.keuangan-app.com',
-                      onTap: () {
-                        // TODO: Implement web launch
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Fitur website akan segera hadir'),
-                          ),
-                        );
+                      onTap: () async {
+                        final Uri webLaunchUri = Uri.parse('https://www.keuangan-app.com');
+                        if (!await launchUrl(webLaunchUri, mode: LaunchMode.externalApplication)) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Gagal membuka website'),
+                            ),
+                          );
+                        }
                       },
                     ),
                   ],

@@ -380,6 +380,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                       if (shouldDisable == true) {
                         _settingsService.pinEnabled = false;
                         _settingsService.pin = null;
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('PIN berhasil dinonaktifkan'),

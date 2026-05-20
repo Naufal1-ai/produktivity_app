@@ -79,7 +79,7 @@ class _ExportScreenState extends State<ExportScreen> {
               tx.isIncome ? 'Pemasukan' : 'Pengeluaran',
               tx.category,
               tx.amount.toString(),
-              tx.note ?? '',
+              tx.note,
             ]),
       ];
 
@@ -87,6 +87,7 @@ class _ExportScreenState extends State<ExportScreen> {
       final file = File(filePath);
       await file.writeAsString(csvString);
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -96,6 +97,7 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -104,7 +106,9 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
       );
     } finally {
-      setState(() => _isExporting = false);
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
     }
   }
 
@@ -144,7 +148,7 @@ class _ExportScreenState extends State<ExportScreen> {
               pw.Text(
                   'Dibuat pada: ${DateFormat('dd MMMM yyyy HH:mm').format(DateTime.now())}'),
               pw.SizedBox(height: 20),
-              pw.Table.fromTextArray(
+              pw.TableHelper.fromTextArray(
                 headers: ['Tanggal', 'Jenis', 'Kategori', 'Jumlah', 'Catatan'],
                 data: _transactions
                     .map((tx) => [
@@ -152,7 +156,7 @@ class _ExportScreenState extends State<ExportScreen> {
                           tx.isIncome ? 'Pemasukan' : 'Pengeluaran',
                           tx.category,
                           'Rp ${tx.amount.toStringAsFixed(0)}',
-                          tx.note ?? '',
+                          tx.note,
                         ])
                     .toList(),
                 headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
@@ -172,6 +176,7 @@ class _ExportScreenState extends State<ExportScreen> {
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -181,6 +186,7 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -189,7 +195,9 @@ class _ExportScreenState extends State<ExportScreen> {
         ),
       );
     } finally {
-      setState(() => _isExporting = false);
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
     }
   }
 
