@@ -28,12 +28,12 @@ class GlassContainer extends StatelessWidget {
     final effectiveBlur = isMobile ? 0.0 : blur;
     final defaultColor = AppColors.isDark
         ? Colors.white.withValues(alpha: isMobile ? 0.08 : 0.06)
-        : Colors.white.withValues(alpha: isMobile ? 0.88 : 0.72);
+        : (isMobile ? Colors.white : Colors.white.withValues(alpha: 0.85));
 
     final defaultBorder = Border.all(
       color: AppColors.isDark
           ? Colors.white.withValues(alpha: 0.1)
-          : AppColors.blueAccent.withValues(alpha: 0.12),
+          : Colors.black.withValues(alpha: 0.05),
       width: 1.0,
     );
 
@@ -45,9 +45,9 @@ class GlassContainer extends StatelessWidget {
           BoxShadow(
             color: AppColors.isDark
                 ? Colors.black.withValues(alpha: 0.14)
-                : Colors.black.withValues(alpha: 0.08),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
+                : Colors.black.withValues(alpha: 0.06),
+            blurRadius: AppColors.isDark ? 22 : 16,
+            offset: AppColors.isDark ? const Offset(0, 10) : const Offset(0, 6),
           )
         ],
       ),

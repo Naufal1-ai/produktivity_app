@@ -166,7 +166,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
       child: Column(
         children: [
           GlassContainer(
@@ -317,7 +317,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
         final yMax = maxVal == 0 ? 1000000.0 : maxVal * 1.25;
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
           child: Column(
             children: [
               GlassContainer(

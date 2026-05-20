@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:productivity/l10n/app_localizations.dart';
 import 'package:productivity/providers/localization_provider.dart';
 
 class LanguageScreen extends StatefulWidget {

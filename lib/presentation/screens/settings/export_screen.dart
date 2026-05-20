@@ -6,7 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:productivity/presentation/widgets/grid_background.dart';
+import 'package:productivity/l10n/app_localizations.dart';
 import 'package:productivity/data/models/transaction_model.dart';
 import 'package:productivity/data/repositories/transaction_repository.dart';
 import 'package:intl/intl.dart';
@@ -212,215 +213,196 @@ class _ExportScreenState extends State<ExportScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.exportData),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Info Section
-              GlassContainer(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.blueAccent.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.download,
-                            color: AppColors.blueAccent,
-                            size: 24,
-                          ),
+      backgroundColor:
+          AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
+      body: GridBackground(
+        child: SafeArea(
+          bottom: false,
+          child: CustomScrollView(
+            slivers: [
+              // ── Header ──────────────────────────────────────────────
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.blueAccent.withValues(alpha: 0.14),
+                          shape: BoxShape.circle,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Icon(
+                          Icons.download_rounded,
+                          color: AppColors.blueAccent,
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.exportData,
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Ekspor transaksi ke CSV atau PDF',
+                            style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // ── Stats Section ──────────────────────────────────
+                    GlassContainer(
+                      borderRadius: 20,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Ringkasan Data',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Row(
                             children: [
-                              Text(
-                                l10n.exportData,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Total Transaksi',
+                                  value: _transactions.length.toString(),
+                                  icon: Icons.receipt_long_outlined,
+                                  color: AppColors.blueAccent,
+                                ),
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Export data transaksi Anda dalam format CSV atau PDF',
-                                style: TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 14,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Pemasukan',
+                                  value:
+                                      'Rp ${_calculateTotal(true).toStringAsFixed(0)}',
+                                  icon: Icons.trending_up_rounded,
+                                  color: AppColors.income,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Stats Section
-              GlassContainer(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ringkasan Data',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Pengeluaran',
+                                  value:
+                                      'Rp ${_calculateTotal(false).toStringAsFixed(0)}',
+                                  icon: Icons.trending_down_rounded,
+                                  color: AppColors.expense,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatCard(
+                                  title: 'Saldo',
+                                  value:
+                                      'Rp ${(_calculateTotal(true) - _calculateTotal(false)).toStringAsFixed(0)}',
+                                  icon: Icons.account_balance_wallet_outlined,
+                                  color: (_calculateTotal(true) -
+                                              _calculateTotal(false)) >=
+                                          0
+                                      ? AppColors.income
+                                      : AppColors.expense,
+                                ),
+                              ),
+                            ],
                           ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _StatCard(
-                            title: 'Total Transaksi',
-                            value: _transactions.length.toString(),
-                            icon: Icons.receipt,
-                            color: AppColors.blueAccent,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            title: 'Pemasukan',
-                            value:
-                                'Rp ${_calculateTotal(true).toStringAsFixed(0)}',
-                            icon: Icons.trending_up,
-                            color: AppColors.income,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _StatCard(
-                            title: 'Pengeluaran',
-                            value:
-                                'Rp ${_calculateTotal(false).toStringAsFixed(0)}',
-                            icon: Icons.trending_down,
-                            color: AppColors.expense,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            title: 'Saldo',
-                            value:
-                                'Rp ${(_calculateTotal(true) - _calculateTotal(false)).toStringAsFixed(0)}',
-                            icon: Icons.account_balance_wallet,
-                            color: (_calculateTotal(true) -
-                                        _calculateTotal(false)) >=
-                                    0
-                                ? AppColors.income
-                                : AppColors.expense,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Export Options
-              GlassContainer(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Pilih Format Export',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // CSV Export
-                    _ExportOption(
-                      title: l10n.exportCSV,
-                      subtitle:
-                          'Format CSV untuk spreadsheet (Excel, Google Sheets)',
-                      icon: Icons.table_chart,
-                      onTap: _isExporting ? null : _exportToCSV,
-                      isLoading: _isExporting,
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 16),
 
-                    // PDF Export
-                    _ExportOption(
-                      title: l10n.exportPDF,
-                      subtitle: 'Format PDF untuk dokumen dan cetak',
-                      icon: Icons.picture_as_pdf,
-                      onTap: _isExporting ? null : _exportToPDF,
-                      isLoading: _isExporting,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Note Section
-              GlassContainer(
-                borderRadius: 16,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: AppColors.textMuted,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          'Catatan',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textMuted,
-                                  ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'File akan disimpan di folder Download perangkat Anda. Pastikan memberikan izin akses penyimpanan saat diminta.',
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 14,
-                        height: 1.5,
+                    // ── Export Options ─────────────────────────────────
+                    GlassContainer(
+                      borderRadius: 20,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Pilih Format Export',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          _ExportOption(
+                            title: l10n.exportCSV,
+                            subtitle:
+                                'Untuk spreadsheet (Excel, Google Sheets)',
+                            icon: Icons.table_chart_outlined,
+                            onTap: _isExporting ? null : _exportToCSV,
+                            isLoading: _isExporting,
+                          ),
+                          const SizedBox(height: 12),
+                          _ExportOption(
+                            title: l10n.exportPDF,
+                            subtitle: 'Untuk dokumen dan cetak',
+                            icon: Icons.picture_as_pdf_outlined,
+                            onTap: _isExporting ? null : _exportToPDF,
+                            isLoading: _isExporting,
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                    const SizedBox(height: 16),
+
+                    // ── Note ──────────────────────────────────────────
+                    GlassContainer(
+                      borderRadius: 20,
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            color: AppColors.blueAccent,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'File akan disimpan di folder dokumen perangkat Anda. Pastikan memberikan izin akses penyimpanan saat diminta.',
+                              style: TextStyle(
+                                color: AppColors.textSecondary,
+                                fontSize: 13,
+                                height: 1.5,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ]),
                 ),
               ),
             ],

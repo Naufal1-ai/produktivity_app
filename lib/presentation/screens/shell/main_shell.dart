@@ -91,13 +91,15 @@ class _MainShellState extends State<MainShell> {
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            width: 48,
+                            height: 48,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(14),
+                              image: const DecorationImage(
+                                image: AssetImage('assets/logo.png'),
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                            child: const Icon(Icons.bolt,
-                                color: Colors.white, size: 28),
                           ),
                           const SizedBox(width: 16),
                           Expanded(
@@ -409,12 +411,11 @@ class _SideNav extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.blueMid, AppColors.blueAccent],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
               borderRadius: BorderRadius.circular(12),
+              image: const DecorationImage(
+                image: AssetImage('assets/logo.png'),
+                fit: BoxFit.cover,
+              ),
               boxShadow: [
                 BoxShadow(
                   color: AppColors.blueAccent.withValues(alpha: 0.3),
@@ -423,7 +424,6 @@ class _SideNav extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.bolt, color: Colors.white, size: 24),
           ),
           const SizedBox(height: 48),
           ...List.generate(_items.length, (i) {

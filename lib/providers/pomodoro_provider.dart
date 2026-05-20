@@ -25,6 +25,8 @@ class PomodoroProvider extends ChangeNotifier {
   bool get isRunning => _isRunning;
   bool get isWorkSession => _isWorkSession;
   int get remainingSeconds => _remainingSeconds;
+  int get workDuration => _workDuration;
+  int get breakDuration => _breakDuration;
   String get currentTask => _currentTask;
   Duration get remainingDuration => Duration(seconds: _remainingSeconds);
   bool get hasActiveSession => _currentSession != null && _isRunning;
@@ -103,6 +105,19 @@ class PomodoroProvider extends ChangeNotifier {
     _remainingSeconds = _workDuration * 60;
     _currentTask = '';
     _currentSession = null;
+    notifyListeners();
+  }
+
+  /// Skip langsung ke sesi berikutnya (kerja → istirahat atau sebaliknya)
+  void skipSession() {
+    _timer?.cancel();
+    _isRunning = false;
+    if (_isWorkSession) {
+      _completeSession();
+      _switchToBreak();
+    } else {
+      _switchToWork();
+    }
     notifyListeners();
   }
 

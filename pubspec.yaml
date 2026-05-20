@@ -13,7 +13,7 @@ dependencies:
   firebase_core: ^3.1.0
   firebase_auth: ^5.0.0
   cloud_firestore: ^5.0.1
-  intl: ^0.19.0
+  intl: 0.20.2
   google_sign_in: ^6.2.1
   shared_preferences: ^2.3.2
   provider: ^6.0.6
@@ -33,10 +33,29 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^3.0.0
   flutter_gen_runner: ^5.4.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
+  min_sdk_android: 21
+
+flutter_native_splash:
+  color: "#F8FAFC"
+  image: "assets/logo.png"
+  color_dark: "#0F1117"
+  image_dark: "assets/logo.png"
+  android_12:
+    image: "assets/logo.png"
+    icon_background_color: "#F8FAFC"
+    image_dark: "assets/logo.png"
+    icon_background_color_dark: "#0F1117"
 
 flutter:
   uses-material-design: true
   generate: true
   assets:
     - .env
-
+    - assets/logo.png

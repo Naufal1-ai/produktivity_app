@@ -16,9 +16,11 @@ class FinanceScreen extends StatelessWidget {
         backgroundColor:
             AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
         // ✅ GridBackground membungkus seluruh body termasuk semua tab
-        body: GridBackground(
-          child: SafeArea(
-            child: Column(
+        body: SizedBox.expand(
+          child: GridBackground(
+            child: SafeArea(
+              bottom: false,
+              child: Column(
               children: [
                 // ✅ Header dengan desain lebih baik
                 Padding(
@@ -102,6 +104,7 @@ class FinanceScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

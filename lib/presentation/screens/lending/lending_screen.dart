@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/data/models/lending_model.dart';
 import 'package:productivity/data/repositories/lending_repository.dart';
@@ -39,219 +40,428 @@ class _LendingScreenState extends State<LendingScreen> {
           AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
       body: GridBackground(
         child: SafeArea(
-          child: Column(
-            children: [
-              // ✅ Header konsisten
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.blueAccent.withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.inventory_2_outlined,
-                        color: AppColors.blueAccent,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Barang Dipinjam',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => _openForm(),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.blueAccent.withValues(alpha: 0.14),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.add,
-                          color: AppColors.blueAccent,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+          // ✅ bottom: false agar konten bisa masuk ke bawah
+          // dan nav bar glass terlihat mengambang
+          bottom: false,
+          child: StreamBuilder<List<LendingModel>>(
+            stream: _lendingStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                      color: AppColors.blueAccent, strokeWidth: 2),
+                );
+              }
 
-              // ✅ List konten
-              Expanded(
-                child: StreamBuilder<List<LendingModel>>(
-                  stream: _lendingStream,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('⚠️', style: TextStyle(fontSize: 48)),
+                      const SizedBox(height: 12),
+                      Text('Terjadi kesalahan saat memuat data',
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 15)),
+                    ],
+                  ),
+                );
+              }
 
-                    if (snapshot.hasError) {
-                      return Center(
+              final items = snapshot.data ?? [];
+              final activeItems = items.where((i) => !i.isReturned).toList();
+              final overdueItems = items
+                  .where((i) =>
+                      !i.isReturned &&
+                      i.targetReturnDate.isBefore(DateTime.now()))
+                  .toList();
+              final returnedItems =
+                  items.where((i) => i.isReturned).toList();
+
+              return CustomScrollView(
+                slivers: [
+                  // ── Header ────────────────────────────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.blueAccent.withValues(alpha: 0.14),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.inventory_2_outlined,
+                                color: AppColors.blueAccent, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Barang Dipinjam',
+                                  style: TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Catat & pantau barang pinjaman',
+                                  style: TextStyle(
+                                      color: AppColors.textMuted, fontSize: 12),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ── Stat Cards ──────────────────────────────────────
+                  if (items.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Aktif',
+                                value: '${activeItems.length}',
+                                icon: Icons.hourglass_empty_rounded,
+                                color: AppColors.blueAccent,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Terlambat',
+                                value: '${overdueItems.length}',
+                                icon: Icons.warning_amber_rounded,
+                                color: overdueItems.isEmpty
+                                    ? AppColors.greenSuccess
+                                    : AppColors.expense,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _StatCard(
+                                label: 'Selesai',
+                                value: '${returnedItems.length}',
+                                icon: Icons.check_circle_outline_rounded,
+                                color: AppColors.greenSuccess,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // ── Empty State ───────────────────────────────────
+                  if (items.isEmpty)
+                    SliverFillRemaining(
+                      child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Text('⚠️', style: TextStyle(fontSize: 48)),
-                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(28),
+                              decoration: BoxDecoration(
+                                color: AppColors.blueAccent
+                                    .withValues(alpha: 0.08),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.inventory_2_outlined,
+                                  size: 52, color: AppColors.textDim),
+                            ),
+                            const SizedBox(height: 20),
                             Text(
-                              'Terjadi kesalahan saat memuat data',
+                              'Belum ada barang dipinjam',
                               style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 15),
+                                color: AppColors.textSecondary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              '${snapshot.error}',
-                              style: const TextStyle(
-                                  color: AppColors.expense, fontSize: 12),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    final items = snapshot.data ?? [];
-
-                    if (items.isEmpty) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('📦', style: TextStyle(fontSize: 64)),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Belum ada barang yang dipinjam',
+                              'Tap tombol + untuk menambah catatan',
                               style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 16),
+                                  color: AppColors.textMuted, fontSize: 13),
                             ),
                           ],
                         ),
-                      );
-                    }
+                      ),
+                    )
+                  else
+                    // ── Item List ────────────────────────────────────
+                    SliverPadding(
+                      // ✅ padding bawah 120 agar konten tidak tertutup nav bar
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final item = items[index];
+                            final isOverdue = !item.isReturned &&
+                                item.targetReturnDate
+                                    .isBefore(DateTime.now());
 
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 120),
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        final isOverdue = !item.isReturned &&
-                            item.targetReturnDate.isBefore(DateTime.now());
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GlassContainer(
+                                borderRadius: 20,
+                                padding: EdgeInsets.zero,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Column(
+                                    children: [
+                                      if (isOverdue)
+                                        Container(
+                                            height: 3,
+                                            color: AppColors.expense),
+                                      Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            // Custom checkbox
+                                            GestureDetector(
+                                              onTap: () =>
+                                                  _repo.toggleStatus(
+                                                      item.id,
+                                                      item.isReturned),
+                                              child: AnimatedContainer(
+                                                duration: const Duration(
+                                                    milliseconds: 200),
+                                                width: 26,
+                                                height: 26,
+                                                margin: const EdgeInsets.only(
+                                                    right: 12, top: 2),
+                                                decoration: BoxDecoration(
+                                                  color: item.isReturned
+                                                      ? AppColors.greenSuccess
+                                                      : Colors.transparent,
+                                                  border: Border.all(
+                                                    color: item.isReturned
+                                                        ? AppColors
+                                                            .greenSuccess
+                                                        : AppColors
+                                                            .borderAccent,
+                                                    width: 2,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.circular(7),
+                                                ),
+                                                child: item.isReturned
+                                                    ? const Icon(
+                                                        Icons.check_rounded,
+                                                        color: Colors.white,
+                                                        size: 15)
+                                                    : null,
+                                              ),
+                                            ),
 
-                        return GlassContainer(
-                          borderRadius: 16,
-                          padding: const EdgeInsets.all(16),
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: item.isReturned,
-                                activeColor: AppColors.greenSuccess,
-                                onChanged: (val) {
-                                  _repo.toggleStatus(item.id, item.isReturned);
-                                },
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.itemName,
-                                      style: TextStyle(
-                                        color: item.isReturned
-                                            ? AppColors.textMuted
-                                            : AppColors.textPrimary,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        decoration: item.isReturned
-                                            ? TextDecoration.lineThrough
-                                            : null,
+                                            // Content
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Text(
+                                                          item.itemName,
+                                                          style: TextStyle(
+                                                            color: item
+                                                                    .isReturned
+                                                                ? AppColors
+                                                                    .textMuted
+                                                                : AppColors
+                                                                    .textPrimary,
+                                                            fontSize: 15,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            decoration: item
+                                                                    .isReturned
+                                                                ? TextDecoration
+                                                                    .lineThrough
+                                                                : null,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      if (item.isReturned)
+                                                        _Badge(
+                                                            'Dikembalikan',
+                                                            AppColors
+                                                                .greenSuccess)
+                                                      else if (isOverdue)
+                                                        _Badge('Terlambat',
+                                                            AppColors.expense),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 6),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                          Icons
+                                                              .person_outline_rounded,
+                                                          size: 13,
+                                                          color: AppColors
+                                                              .textMuted),
+                                                      const SizedBox(width: 4),
+                                                      Text(item.borrowerName,
+                                                          style: TextStyle(
+                                                              color: AppColors
+                                                                  .textSecondary,
+                                                              fontSize: 13)),
+                                                      const SizedBox(width: 8),
+                                                      Container(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 6,
+                                                            vertical: 2),
+                                                        decoration: BoxDecoration(
+                                                          color: AppColors
+                                                              .borderAccent
+                                                              .withValues(
+                                                                  alpha: 0.6),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(5),
+                                                        ),
+                                                        child: Text(
+                                                            item.category,
+                                                            style: TextStyle(
+                                                                color: AppColors
+                                                                    .textMuted,
+                                                                fontSize: 11)),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  Row(
+                                                    children: [
+                                                      Icon(
+                                                        isOverdue
+                                                            ? Icons
+                                                                .warning_amber_rounded
+                                                            : Icons
+                                                                .calendar_today_outlined,
+                                                        size: 13,
+                                                        color: isOverdue
+                                                            ? AppColors.expense
+                                                            : AppColors
+                                                                .textMuted,
+                                                      ),
+                                                      const SizedBox(width: 4),
+                                                      Text(
+                                                        'Tenggat: ${DateFormat('dd MMM yyyy').format(item.targetReturnDate)}',
+                                                        style: TextStyle(
+                                                          color: isOverdue
+                                                              ? AppColors
+                                                                  .expense
+                                                              : AppColors
+                                                                  .textMuted,
+                                                          fontSize: 12,
+                                                          fontWeight: isOverdue
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            // Menu
+                                            PopupMenuButton(
+                                              icon: Icon(Icons.more_vert,
+                                                  color: AppColors.textMuted,
+                                                  size: 20),
+                                              color: AppColors.bgCard,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          14)),
+                                              itemBuilder: (ctx) => [
+                                                PopupMenuItem(
+                                                  value: 'edit',
+                                                  child: Row(children: [
+                                                    Icon(Icons.edit_outlined,
+                                                        size: 16,
+                                                        color: AppColors
+                                                            .blueAccent),
+                                                    const SizedBox(width: 8),
+                                                    Text('Edit',
+                                                        style: TextStyle(
+                                                            color: AppColors
+                                                                .textPrimary)),
+                                                  ]),
+                                                ),
+                                                PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Row(children: [
+                                                    Icon(
+                                                        Icons
+                                                            .delete_outline_rounded,
+                                                        size: 16,
+                                                        color:
+                                                            AppColors.expense),
+                                                    const SizedBox(width: 8),
+                                                    Text('Hapus',
+                                                        style: TextStyle(
+                                                            color: AppColors
+                                                                .expense)),
+                                                  ]),
+                                                ),
+                                              ],
+                                              onSelected: (val) {
+                                                if (val == 'edit') {
+                                                  _openForm(item);
+                                                } else {
+                                                  _showDeleteConfirmation(
+                                                      item);
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Dipinjam oleh: ${item.borrowerName} • ${item.category}',
-                                      style: TextStyle(
-                                          color: AppColors.textSecondary,
-                                          fontSize: 13),
-                                    ),
-                                    const SizedBox(height: 6),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          size: 14,
-                                          color: isOverdue
-                                              ? AppColors.expense
-                                              : AppColors.textMuted,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          'Tenggat: ${item.targetReturnDate.day}/${item.targetReturnDate.month}/${item.targetReturnDate.year}',
-                                          style: TextStyle(
-                                            color: isOverdue
-                                                ? AppColors.expense
-                                                : AppColors.textMuted,
-                                            fontSize: 12,
-                                            fontWeight: isOverdue
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                              PopupMenuButton(
-                                icon: Icon(Icons.more_vert,
-                                    color: AppColors.textMuted),
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
-                                      value: 'edit', child: Text('Edit')),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Text('Hapus',
-                                        style: TextStyle(color: Colors.red)),
-                                  ),
-                                ],
-                                onSelected: (val) {
-                                  if (val == 'edit') {
-                                    _openForm(item);
-                                  } else if (val == 'delete') {
-                                    _showDeleteConfirmation(item);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+                            );
+                          },
+                          childCount: items.length,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 100),
         child: FloatingActionButton(
-          backgroundColor: AppColors.blueAccent,
           onPressed: () => _openForm(),
-          child:
-              const Icon(Icons.add, color: Color.fromARGB(255, 255, 255, 255)),
+          backgroundColor: AppColors.blueAccent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: const CircleBorder(
+              side: BorderSide(color: Colors.transparent)),
+          child: const Icon(Icons.add),
         ),
       ),
     );
@@ -261,12 +471,13 @@ class _LendingScreenState extends State<LendingScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor:
-            AppColors.isDark ? const Color(0xFF1A1D27) : Colors.white,
-        title: Text(
-          'Hapus Barang?',
-          style: TextStyle(color: AppColors.textPrimary),
-        ),
+        backgroundColor: AppColors.bgCard,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('Hapus Barang?',
+            style: TextStyle(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold)),
         content: Text(
           'Yakin ingin menghapus "${item.itemName}"?',
           style: TextStyle(color: AppColors.textSecondary),
@@ -274,15 +485,77 @@ class _LendingScreenState extends State<LendingScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Batal', style: TextStyle(color: AppColors.textMuted)),
+            child: Text('Batal',
+                style: TextStyle(color: AppColors.textMuted)),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               _repo.delete(item.id);
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Hapus',
+                style: TextStyle(color: AppColors.expense)),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Helper widgets ────────────────────────────────────────────────────────────
+
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Badge(this.label, this.color);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(label,
+          style: TextStyle(
+              color: color, fontSize: 10, fontWeight: FontWeight.w600)),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassContainer(
+      borderRadius: 16,
+      padding: const EdgeInsets.all(14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(height: 8),
+          Text(value,
+              style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),
+          const SizedBox(height: 2),
+          Text(label,
+              style:
+                  TextStyle(color: AppColors.textMuted, fontSize: 11)),
         ],
       ),
     );

@@ -141,18 +141,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 38,
                     height: 38,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [primaryColor, cs.secondary],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
                       borderRadius: BorderRadius.circular(11),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/logo.png'),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    child:
-                        const Icon(Icons.bolt, color: Colors.white, size: 20),
                   ),
                   const SizedBox(width: 10),
-                  Text('Productivity',
+                  Text('KeuanganApp',
                       style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,

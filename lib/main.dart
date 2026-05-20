@@ -9,7 +9,7 @@ import 'package:productivity/firebase_options.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/screens/auth/login_screen.dart';
 import 'package:productivity/presentation/screens/shell/main_shell.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:productivity/l10n/app_localizations.dart';
 import 'package:productivity/services/settings_service.dart';
 import 'package:productivity/providers/localization_provider.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
@@ -101,7 +101,7 @@ class MyApp extends StatelessWidget {
                 stream: FirebaseAuth.instance.authStateChanges(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const _SplashScreen();
+                    return const Scaffold();
                   }
                   if (snapshot.hasData) {
                     return MainShell(
@@ -125,25 +125,3 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('🌿', style: TextStyle(fontSize: 48)),
-            const SizedBox(height: 16),
-            CircularProgressIndicator(
-              color: AppColors.blueAccent,
-              strokeWidth: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

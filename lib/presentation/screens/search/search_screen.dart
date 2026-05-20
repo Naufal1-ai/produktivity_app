@@ -53,243 +53,255 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header + search bar
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-              child: GlassContainer(
-                borderRadius: 24,
-                color: AppColors.isDark
-                    ? null
-                    : const Color.fromARGB(255, 255, 255, 255)
-                        .withValues(alpha: 0.8),
-                border: Border.all(
-                    color: AppColors.blueAccent.withValues(alpha: 0.12)),
-                padding: const EdgeInsets.all(18),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('CARI',
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(letterSpacing: 1.4)),
-                    const SizedBox(height: 2),
-                    Text('🔍 Pencarian Transaksi',
-                        style: Theme.of(context).textTheme.headlineMedium),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _searchCtrl,
-                      autofocus: false,
-                      style:
-                          TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Cari kategori, catatan, atau jumlah...',
-                        prefixIcon: Icon(Icons.search,
-                            color: AppColors.textMuted, size: 20),
-                        suffixIcon: _query.isNotEmpty
-                            ? IconButton(
-                                icon: Icon(Icons.close,
-                                    color: AppColors.textMuted, size: 18),
-                                onPressed: () {
-                                  _searchCtrl.clear();
-                                  setState(() => _query = '');
-                                },
-                              )
-                            : null,
-                      ),
-                      onChanged: (v) => setState(() => _query = v),
-                    ),
-                  ],
-                ),
+    // Karena dipanggil di dalam FinanceScreen yang sudah punya GridBackground,
+    // kita hilangkan Scaffold agar background tembus.
+    return Column(
+      children: [
+        // ── Search Bar ────────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+          child: GlassContainer(
+            borderRadius: 20,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            child: TextField(
+              controller: _searchCtrl,
+              autofocus: false,
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
               ),
+              decoration: InputDecoration(
+                hintText: 'Cari catatan, kategori, atau jumlah...',
+                hintStyle: TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 14,
+                  fontWeight: FontWeight.normal,
+                ),
+                prefixIcon: Icon(Icons.search_rounded,
+                    color: AppColors.blueAccent, size: 22),
+                suffixIcon: _query.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () {
+                          _searchCtrl.clear();
+                          setState(() => _query = '');
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppColors.borderAccent,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.close_rounded,
+                              color: AppColors.textPrimary, size: 14),
+                        ),
+                      )
+                    : null,
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+              onChanged: (v) => setState(() => _query = v),
             ),
+          ),
+        ),
 
-            // Filter chips
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GlassContainer(
-                borderRadius: 20,
-                color: AppColors.isDark
-                    ? null
-                    : Colors.white.withValues(alpha: 0.72),
-                border: Border.all(
-                    color: AppColors.blueAccent.withValues(alpha: 0.12)),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: SizedBox(
-                  height: 38,
-                  child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    scrollDirection: Axis.horizontal,
+        // ── Filter Chips ──────────────────────────────────────────────────────
+        SizedBox(
+          height: 40,
+          child: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            scrollDirection: Axis.horizontal,
+            children: [
+              _FilterChip(
+                label: 'Semua',
+                selected: _filterType == null && _filterCategory == null,
+                onTap: () => setState(() {
+                  _filterType = null;
+                  _filterCategory = null;
+                }),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: '📈 Pemasukan',
+                selected: _filterType == 'pemasukan',
+                color: AppColors.income,
+                onTap: () => setState(() {
+                  _filterType = _filterType == 'pemasukan' ? null : 'pemasukan';
+                  _filterCategory = null;
+                }),
+              ),
+              const SizedBox(width: 8),
+              _FilterChip(
+                label: '📉 Pengeluaran',
+                selected: _filterType == 'pengeluaran',
+                color: AppColors.expense,
+                onTap: () => setState(() {
+                  _filterType =
+                      _filterType == 'pengeluaran' ? null : 'pengeluaran';
+                  _filterCategory = null;
+                }),
+              ),
+              const SizedBox(width: 8),
+              ...kTransactionCategories.map((cat) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _FilterChip(
+                      label: cat,
+                      selected: _filterCategory == cat,
+                      onTap: () => setState(() {
+                        _filterCategory = _filterCategory == cat ? null : cat;
+                        _filterType = null;
+                      }),
+                    ),
+                  )),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // ── Results ───────────────────────────────────────────────────────────
+        Expanded(
+          child: StreamBuilder<List<TransactionModel>>(
+            stream: _repo.watchAll(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(
+                      color: AppColors.blueAccent, strokeWidth: 2),
+                );
+              }
+
+              final all = snapshot.data ?? [];
+              final filtered = _applyFilter(all);
+
+              if (filtered.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _FilterChip(
-                        label: 'Semua',
-                        selected:
-                            _filterType == null && _filterCategory == null,
-                        onTap: () => setState(() {
-                          _filterType = null;
-                          _filterCategory = null;
-                        }),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: AppColors.blueAccent.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.search_off_rounded,
+                            size: 48, color: AppColors.textMuted),
                       ),
-                      const SizedBox(width: 8),
-                      _FilterChip(
-                        label: '📈 Pemasukan',
-                        selected: _filterType == 'pemasukan',
-                        color: AppColors.income,
-                        onTap: () => setState(() {
-                          _filterType =
-                              _filterType == 'pemasukan' ? null : 'pemasukan';
-                          _filterCategory = null;
-                        }),
+                      const SizedBox(height: 20),
+                      Text(
+                        _query.isEmpty && _filterType == null
+                            ? 'Belum ada transaksi'
+                            : 'Tidak ada hasil ditemukan',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600),
                       ),
-                      const SizedBox(width: 8),
-                      _FilterChip(
-                        label: '📉 Pengeluaran',
-                        selected: _filterType == 'pengeluaran',
-                        color: AppColors.expense,
-                        onTap: () => setState(() {
-                          _filterType = _filterType == 'pengeluaran'
-                              ? null
-                              : 'pengeluaran';
-                          _filterCategory = null;
-                        }),
-                      ),
-                      const SizedBox(width: 8),
-                      ...kTransactionCategories.map((cat) => Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: _FilterChip(
-                              label: cat,
-                              selected: _filterCategory == cat,
-                              onTap: () => setState(() {
-                                _filterCategory =
-                                    _filterCategory == cat ? null : cat;
-                                _filterType = null;
-                              }),
-                            ),
-                          )),
+                      const SizedBox(height: 8),
+                      if (_query.isNotEmpty || _filterType != null)
+                        Text(
+                          'Coba ubah kata kunci atau hapus filter pencarian',
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 13),
+                        ),
                     ],
                   ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
+                );
+              }
 
-            // Results
-            Expanded(
-              child: StreamBuilder<List<TransactionModel>>(
-                stream: _repo.watchAll(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.blueAccent, strokeWidth: 2),
-                    );
-                  }
+              // Group by month
+              final Map<String, List<TransactionModel>> grouped = {};
+              for (final tx in filtered) {
+                final key = DateFormat('MMMM yyyy', 'id_ID').format(tx.date);
+                grouped.putIfAbsent(key, () => []).add(tx);
+              }
 
-                  final all = snapshot.data ?? [];
-                  final filtered = _applyFilter(all);
-
-                  if (filtered.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Text('🔍', style: TextStyle(fontSize: 40)),
-                          const SizedBox(height: 12),
-                          Text(
-                            _query.isEmpty && _filterType == null
-                                ? 'Belum ada transaksi'
-                                : 'Tidak ada hasil untuk\n"${_query.isNotEmpty ? _query : (_filterType ?? _filterCategory ?? '')}"',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: AppColors.textMuted, fontSize: 13),
+              return Column(
+                children: [
+                  // Result summary
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.borderAccent.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                        ],
-                      ),
-                    );
-                  }
-
-                  // Group by month
-                  final Map<String, List<TransactionModel>> grouped = {};
-                  for (final tx in filtered) {
-                    final key =
-                        DateFormat('MMMM yyyy', 'id_ID').format(tx.date);
-                    grouped.putIfAbsent(key, () => []).add(tx);
-                  }
-
-                  return Column(
-                    children: [
-                      // Result count
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              '${filtered.length} transaksi ditemukan',
-                              style: TextStyle(
-                                  color: AppColors.textMuted,
-                                  fontSize: 11,
-                                  letterSpacing: 0.5),
-                            ),
-                            const Spacer(),
-                            Text(
-                              'Total: ${CurrencyUtils.formatCompact(filtered.fold(0.0, (s, t) => s + (t.isIncome ? t.amount : -t.amount)))}',
-                              style: TextStyle(
-                                color: filtered.fold(
-                                            0.0,
-                                            (s, t) =>
-                                                s +
-                                                (t.isIncome
-                                                    ? t.amount
-                                                    : -t.amount)) >=
-                                        0
-                                    ? AppColors.income
-                                    : AppColors.expense,
+                          child: Text(
+                            '${filtered.length} hasil',
+                            style: TextStyle(
+                                color: AppColors.textSecondary,
                                 fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Total: ',
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12),
+                        ),
+                        Text(
+                          CurrencyUtils.formatCompact(filtered.fold(
+                              0.0,
+                              (s, t) =>
+                                  s + (t.isIncome ? t.amount : -t.amount))),
+                          style: TextStyle(
+                            color: filtered.fold(
+                                        0.0,
+                                        (s, t) =>
+                                            s +
+                                            (t.isIncome
+                                                ? t.amount
+                                                : -t.amount)) >=
+                                    0
+                                ? AppColors.income
+                                : AppColors.expense,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                      children: grouped.entries.map((entry) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SectionLabel(entry.key),
+                            ...entry.value.map(
+                              (tx) => TransactionTile(
+                                tx: tx,
+                                onEdit: () => showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (_) =>
+                                      TransactionFormSheet(existing: tx),
+                                ),
+                                onDelete: () => _repo.delete(tx.id),
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      Expanded(
-                        child: ListView(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-                          children: grouped.entries.map((entry) {
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SectionLabel(entry.key),
-                                ...entry.value.map(
-                                  (tx) => TransactionTile(
-                                    tx: tx,
-                                    onEdit: () => showModalBottomSheet(
-                                      context: context,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (_) =>
-                                          TransactionFormSheet(existing: tx),
-                                    ),
-                                    onDelete: () => _repo.delete(tx.id),
-                                  ),
-                                ),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -313,21 +325,23 @@ class _FilterChip extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+        alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? c.withValues(alpha: 0.12) : AppColors.bgCard,
+          color: selected ? c.withValues(alpha: 0.15) : AppColors.bgCard,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? c.withValues(alpha: 0.5) : AppColors.borderAccent,
+            color: selected ? c.withValues(alpha: 0.6) : AppColors.borderAccent,
+            width: selected ? 1.5 : 1,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: selected ? c : AppColors.textMuted,
-            fontSize: 12,
-            fontWeight: selected ? FontWeight.w500 : FontWeight.w400,
+            fontSize: 13,
+            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
           ),
         ),
       ),
