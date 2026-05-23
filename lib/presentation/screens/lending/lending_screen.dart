@@ -79,443 +79,447 @@ class _LendingScreenState extends State<LendingScreen> {
               final returnedItems =
                   items.where((i) => i.isReturned).toList();
 
-              return CustomScrollView(
-                slivers: [
-                  // ── Header ────────────────────────────────────────
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Header (Fixed) ────────────────────────────────────────
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color:
+                                AppColors.blueAccent.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.inventory_2_outlined,
+                              color: AppColors.blueAccent, size: 22),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Barang Dipinjam',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Catat & pantau barang pinjaman',
+                                style: TextStyle(
+                                    color: AppColors.textMuted, fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ── Stat Cards (Fixed) ──────────────────────────────────────
+                  if (items.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
                       child: Row(
                         children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color:
-                                  AppColors.blueAccent.withValues(alpha: 0.14),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(Icons.inventory_2_outlined,
-                                color: AppColors.blueAccent, size: 22),
-                          ),
-                          const SizedBox(width: 12),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Barang Dipinjam',
-                                  style: TextStyle(
-                                    color: AppColors.textPrimary,
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Catat & pantau barang pinjaman',
-                                  style: TextStyle(
-                                      color: AppColors.textMuted, fontSize: 12),
-                                ),
-                              ],
+                            child: _StatCard(
+                              label: 'Aktif',
+                              value: '${activeItems.length}',
+                              icon: Icons.hourglass_empty_rounded,
+                              color: AppColors.blueAccent,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _StatCard(
+                              label: 'Terlambat',
+                              value: '${overdueItems.length}',
+                              icon: Icons.warning_amber_rounded,
+                              color: overdueItems.isEmpty
+                                  ? AppColors.greenSuccess
+                                  : AppColors.expense,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: _StatCard(
+                              label: 'Selesai',
+                              value: '${returnedItems.length}',
+                              icon: Icons.check_circle_outline_rounded,
+                              color: AppColors.greenSuccess,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  // ── Stat Cards ──────────────────────────────────────
-                  if (items.isNotEmpty)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _StatCard(
-                                label: 'Aktif',
-                                value: '${activeItems.length}',
-                                icon: Icons.hourglass_empty_rounded,
-                                color: AppColors.blueAccent,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _StatCard(
-                                label: 'Terlambat',
-                                value: '${overdueItems.length}',
-                                icon: Icons.warning_amber_rounded,
-                                color: overdueItems.isEmpty
-                                    ? AppColors.greenSuccess
-                                    : AppColors.expense,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _StatCard(
-                                label: 'Selesai',
-                                value: '${returnedItems.length}',
-                                icon: Icons.check_circle_outline_rounded,
-                                color: AppColors.greenSuccess,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // ── Empty State ───────────────────────────────────
-                  if (items.isEmpty)
-                    SliverFillRemaining(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(28),
-                              decoration: BoxDecoration(
-                                color: AppColors.blueAccent
-                                    .withValues(alpha: 0.08),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.inventory_2_outlined,
-                                  size: 52, color: AppColors.textDim),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              'Belum ada barang dipinjam',
-                              style: TextStyle(
-                                color: AppColors.textSecondary,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Tap tombol + untuk menambah catatan',
-                              style: TextStyle(
-                                  color: AppColors.textMuted, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  else
-                    // ── Item List ────────────────────────────────────
-                    SliverPadding(
-                      // ✅ padding bawah 120 agar konten tidak tertutup nav bar
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final item = items[index];
-                            final isOverdue = !item.isReturned &&
-                                item.targetReturnDate
-                                    .isBefore(DateTime.now());
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GlassContainer(
-                                borderRadius: 20,
-                                padding: EdgeInsets.zero,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Column(
-                                    children: [
-                                      if (isOverdue)
-                                        Container(
-                                            height: 3,
-                                            color: AppColors.expense),
-                                      Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Custom checkbox
-                                            GestureDetector(
-                                              onTap: () =>
-                                                  _repo.toggleStatus(
-                                                      item.id,
-                                                      item.isReturned),
-                                              child: AnimatedContainer(
-                                                duration: const Duration(
-                                                    milliseconds: 200),
-                                                width: 26,
-                                                height: 26,
-                                                margin: const EdgeInsets.only(
-                                                    right: 12, top: 2),
-                                                decoration: BoxDecoration(
-                                                  color: item.isReturned
-                                                      ? AppColors.greenSuccess
-                                                      : Colors.transparent,
-                                                  border: Border.all(
-                                                    color: item.isReturned
-                                                        ? AppColors
-                                                            .greenSuccess
-                                                        : AppColors
-                                                            .borderAccent,
-                                                    width: 2,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.circular(7),
-                                                ),
-                                                child: item.isReturned
-                                                    ? const Icon(
-                                                        Icons.check_rounded,
-                                                        color: Colors.white,
-                                                        size: 15)
-                                                    : null,
-                                              ),
-                                            ),
-
-                                            // Content
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          item.itemName,
-                                                          style: TextStyle(
-                                                            color: item
-                                                                    .isReturned
-                                                                ? AppColors
-                                                                    .textMuted
-                                                                : AppColors
-                                                                    .textPrimary,
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            decoration: item
-                                                                    .isReturned
-                                                                ? TextDecoration
-                                                                    .lineThrough
-                                                                : null,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      if (item.isReturned)
-                                                        const _Badge(
-                                                            'Dikembalikan',
-                                                            AppColors
-                                                                .greenSuccess)
-                                                      else if (isOverdue)
-                                                        const _Badge('Terlambat',
-                                                            AppColors.expense),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 6),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                          Icons
-                                                              .person_outline_rounded,
-                                                          size: 13,
-                                                          color: AppColors
-                                                              .textMuted),
-                                                      const SizedBox(width: 4),
-                                                      Text(item.borrowerName,
-                                                          style: TextStyle(
-                                                              color: AppColors
-                                                                  .textSecondary,
-                                                              fontSize: 13)),
-                                                      const SizedBox(width: 8),
-                                                      Container(
-                                                        padding: const EdgeInsets
-                                                            .symmetric(
-                                                            horizontal: 6,
-                                                            vertical: 2),
-                                                        decoration: BoxDecoration(
-                                                          color: AppColors
-                                                              .borderAccent
-                                                              .withValues(
-                                                                  alpha: 0.6),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(5),
-                                                        ),
-                                                        child: Text(
-                                                            item.category,
-                                                            style: TextStyle(
-                                                                color: AppColors
-                                                                    .textMuted,
-                                                                fontSize: 11)),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 5),
-                                                  Row(
-                                                    children: [
-                                                      Icon(
-                                                        isOverdue
-                                                            ? Icons
-                                                                .warning_amber_rounded
-                                                            : Icons
-                                                                .calendar_today_outlined,
-                                                        size: 13,
-                                                        color: isOverdue
-                                                            ? AppColors.expense
-                                                            : AppColors
-                                                                .textMuted,
-                                                      ),
-                                                      const SizedBox(width: 4),
-                                                      Text(
-                                                        'Tenggat: ${DateFormat('dd MMM yyyy').format(item.targetReturnDate)}',
-                                                        style: TextStyle(
-                                                          color: isOverdue
-                                                              ? AppColors
-                                                                  .expense
-                                                              : AppColors
-                                                                  .textMuted,
-                                                          fontSize: 12,
-                                                          fontWeight: isOverdue
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  if (item.imageUrl != null && item.imageUrl!.isNotEmpty) ...[
-                                                    const SizedBox(height: 10),
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (ctx) => Dialog(
-                                                            backgroundColor: Colors.transparent,
-                                                            insetPadding: const EdgeInsets.all(16),
-                                                            child: Column(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              children: [
-                                                                Align(
-                                                                  alignment: Alignment.topRight,
-                                                                  child: IconButton(
-                                                                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
-                                                                    onPressed: () => Navigator.pop(ctx),
-                                                                  ),
-                                                                ),
-                                                                ClipRRect(
-                                                                  borderRadius: BorderRadius.circular(16),
-                                                                  child: item.imageUrl!.startsWith('data:image/')
-                                                                      ? Image.memory(
-                                                                          base64Decode(item.imageUrl!.split(',').last),
-                                                                          fit: BoxFit.contain,
-                                                                        )
-                                                                      : Image.network(
-                                                                          item.imageUrl!,
-                                                                          fit: BoxFit.contain,
-                                                                        ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: Hero(
-                                                        tag: 'lending_img_${item.id}',
-                                                        child: Container(
-                                                          height: 120,
-                                                          width: double.infinity,
-                                                          decoration: BoxDecoration(
-                                                            borderRadius: BorderRadius.circular(14),
-                                                            border: Border.all(color: AppColors.borderAccent),
-                                                          ),
-                                                          child: ClipRRect(
-                                                            borderRadius: BorderRadius.circular(14),
-                                                            child: item.imageUrl!.startsWith('data:image/')
-                                                                ? Image.memory(
-                                                                    base64Decode(item.imageUrl!.split(',').last),
-                                                                    fit: BoxFit.cover,
-                                                                    width: double.infinity,
-                                                                    height: 120,
-                                                                  )
-                                                                : Image.network(
-                                                                    item.imageUrl!,
-                                                                    fit: BoxFit.cover,
-                                                                    width: double.infinity,
-                                                                    height: 120,
-                                                                    errorBuilder: (context, error, stackTrace) => Container(
-                                                                      color: AppColors.bgCard,
-                                                                      child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
-                                                                    ),
-                                                                  ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ],
-                                              ),
-                                            ),
-
-                                            // Menu
-                                            PopupMenuButton(
-                                              icon: Icon(Icons.more_vert,
-                                                  color: AppColors.textMuted,
-                                                  size: 20),
-                                              color: AppColors.bgCard,
-                                              shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          14)),
-                                              itemBuilder: (ctx) => [
-                                                PopupMenuItem(
-                                                  value: 'edit',
-                                                  child: Row(children: [
-                                                    Icon(Icons.edit_outlined,
-                                                        size: 16,
-                                                        color: AppColors
-                                                            .blueAccent),
-                                                    const SizedBox(width: 8),
-                                                    Text('Edit',
-                                                        style: TextStyle(
-                                                            color: AppColors
-                                                                .textPrimary)),
-                                                  ]),
-                                                ),
-                                                const PopupMenuItem(
-                                                  value: 'delete',
-                                                  child: Row(children: [
-                                                    Icon(
-                                                        Icons
-                                                            .delete_outline_rounded,
-                                                        size: 16,
-                                                        color:
-                                                            AppColors.expense),
-                                                    SizedBox(width: 8),
-                                                    Text('Hapus',
-                                                        style: TextStyle(
-                                                            color: AppColors
-                                                                .expense)),
-                                                  ]),
-                                                ),
-                                              ],
-                                              onSelected: (val) {
-                                                if (val == 'edit') {
-                                                  _openForm(item);
-                                                } else {
-                                                  _showDeleteConfirmation(
-                                                      item);
-                                                }
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                  // ── Scrollable Body ───────────────────────────────────────────
+                  Expanded(
+                    child: items.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(28),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.blueAccent
+                                        .withValues(alpha: 0.08),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(Icons.inventory_2_outlined,
+                                      size: 52, color: AppColors.textDim),
+                                ),
+                                const SizedBox(height: 20),
+                                Text(
+                                  'Belum ada barang dipinjam',
+                                  style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                          childCount: items.length,
-                        ),
-                      ),
-                    ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Tap tombol + untuk menambah catatan',
+                                  style: TextStyle(
+                                      color: AppColors.textMuted, fontSize: 13),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white,
+                                ],
+                                stops: [0.0, 0.05],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.dstIn,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+                              itemCount: items.length,
+                              itemBuilder: (context, index) {
+                                final item = items[index];
+                                final isOverdue = !item.isReturned &&
+                                    item.targetReturnDate
+                                        .isBefore(DateTime.now());
+
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: GlassContainer(
+                                    borderRadius: 20,
+                                    padding: EdgeInsets.zero,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Column(
+                                        children: [
+                                          if (isOverdue)
+                                            Container(
+                                                height: 3,
+                                                color: AppColors.expense),
+                                          Padding(
+                                            padding: const EdgeInsets.all(16),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                // Custom checkbox
+                                                GestureDetector(
+                                                  onTap: () =>
+                                                      _repo.toggleStatus(
+                                                          item.id,
+                                                          item.isReturned),
+                                                  child: AnimatedContainer(
+                                                    duration: const Duration(
+                                                        milliseconds: 200),
+                                                    width: 26,
+                                                    height: 26,
+                                                    margin: const EdgeInsets.only(
+                                                        right: 12, top: 2),
+                                                    decoration: BoxDecoration(
+                                                      color: item.isReturned
+                                                          ? AppColors.greenSuccess
+                                                          : Colors.transparent,
+                                                      border: Border.all(
+                                                        color: item.isReturned
+                                                            ? AppColors
+                                                                .greenSuccess
+                                                            : AppColors
+                                                                .borderAccent,
+                                                        width: 2,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(7),
+                                                    ),
+                                                    child: item.isReturned
+                                                        ? const Icon(
+                                                            Icons.check_rounded,
+                                                            color: Colors.white,
+                                                            size: 15)
+                                                        : null,
+                                                  ),
+                                                ),
+
+                                                // Content
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: Text(
+                                                              item.itemName,
+                                                              style: TextStyle(
+                                                                color: item
+                                                                        .isReturned
+                                                                    ? AppColors
+                                                                        .textMuted
+                                                                    : AppColors
+                                                                        .textPrimary,
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight.bold,
+                                                                decoration: item
+                                                                        .isReturned
+                                                                    ? TextDecoration
+                                                                        .lineThrough
+                                                                    : null,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          if (item.isReturned)
+                                                            const _Badge(
+                                                                'Dikembalikan',
+                                                                AppColors
+                                                                    .greenSuccess)
+                                                          else if (isOverdue)
+                                                            const _Badge('Terlambat',
+                                                                AppColors.expense),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 6),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                              Icons
+                                                                  .person_outline_rounded,
+                                                              size: 13,
+                                                              color: AppColors
+                                                                  .textMuted),
+                                                          const SizedBox(width: 4),
+                                                          Text(item.borrowerName,
+                                                              style: TextStyle(
+                                                                  color: AppColors
+                                                                      .textSecondary,
+                                                                  fontSize: 13)),
+                                                          const SizedBox(width: 8),
+                                                          Container(
+                                                            padding: const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 6,
+                                                                vertical: 2),
+                                                            decoration: BoxDecoration(
+                                                              color: AppColors
+                                                                  .borderAccent
+                                                                  .withValues(
+                                                                      alpha: 0.6),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(5),
+                                                            ),
+                                                            child: Text(
+                                                                item.category,
+                                                                style: TextStyle(
+                                                                    color: AppColors
+                                                                        .textMuted,
+                                                                    fontSize: 11)),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(height: 5),
+                                                      Row(
+                                                        children: [
+                                                          Icon(
+                                                            isOverdue
+                                                                ? Icons
+                                                                    .warning_amber_rounded
+                                                                : Icons
+                                                                    .calendar_today_outlined,
+                                                            size: 13,
+                                                            color: isOverdue
+                                                                ? AppColors.expense
+                                                                : AppColors
+                                                                    .textMuted,
+                                                          ),
+                                                          const SizedBox(width: 4),
+                                                          Text(
+                                                            'Tenggat: ${DateFormat('dd MMM yyyy').format(item.targetReturnDate)}',
+                                                            style: TextStyle(
+                                                              color: isOverdue
+                                                                  ? AppColors
+                                                                      .expense
+                                                                  : AppColors
+                                                                      .textMuted,
+                                                              fontSize: 12,
+                                                              fontWeight: isOverdue
+                                                                  ? FontWeight.bold
+                                                                  : FontWeight
+                                                                      .normal,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      if (item.imageUrl != null && item.imageUrl!.isNotEmpty) ...[
+                                                        const SizedBox(height: 10),
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (ctx) => Dialog(
+                                                                backgroundColor: Colors.transparent,
+                                                                insetPadding: const EdgeInsets.all(16),
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    Align(
+                                                                      alignment: Alignment.topRight,
+                                                                      child: IconButton(
+                                                                        icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                                                        onPressed: () => Navigator.pop(ctx),
+                                                                      ),
+                                                                    ),
+                                                                    ClipRRect(
+                                                                      borderRadius: BorderRadius.circular(16),
+                                                                      child: item.imageUrl!.startsWith('data:image/')
+                                                                          ? Image.memory(
+                                                                              base64Decode(item.imageUrl!.split(',').last),
+                                                                              fit: BoxFit.contain,
+                                                                            )
+                                                                          : Image.network(
+                                                                              item.imageUrl!,
+                                                                              fit: BoxFit.contain,
+                                                                            ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                          child: Hero(
+                                                            tag: 'lending_img_${item.id}',
+                                                            child: Container(
+                                                              height: 120,
+                                                              width: double.infinity,
+                                                              decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(14),
+                                                                border: Border.all(color: AppColors.borderAccent),
+                                                              ),
+                                                              child: ClipRRect(
+                                                                borderRadius: BorderRadius.circular(14),
+                                                                child: item.imageUrl!.startsWith('data:image/')
+                                                                    ? Image.memory(
+                                                                        base64Decode(item.imageUrl!.split(',').last),
+                                                                        fit: BoxFit.cover,
+                                                                        width: double.infinity,
+                                                                        height: 120,
+                                                                      )
+                                                                    : Image.network(
+                                                                        item.imageUrl!,
+                                                                        fit: BoxFit.cover,
+                                                                        width: double.infinity,
+                                                                        height: 120,
+                                                                        errorBuilder: (context, error, stackTrace) => Container(
+                                                                          color: AppColors.bgCard,
+                                                                          child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                                                        ),
+                                                                      ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ],
+                                                  ),
+                                                ),
+
+                                                // Menu
+                                                PopupMenuButton(
+                                                  icon: Icon(Icons.more_vert,
+                                                      color: AppColors.textMuted,
+                                                      size: 20),
+                                                  color: AppColors.bgCard,
+                                                  shape: RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              14)),
+                                                  itemBuilder: (ctx) => [
+                                                    PopupMenuItem(
+                                                      value: 'edit',
+                                                      child: Row(children: [
+                                                        Icon(Icons.edit_outlined,
+                                                            size: 16,
+                                                            color: AppColors
+                                                                .blueAccent),
+                                                        const SizedBox(width: 8),
+                                                        Text('Edit',
+                                                            style: TextStyle(
+                                                                color: AppColors
+                                                                    .textPrimary)),
+                                                      ]),
+                                                    ),
+                                                    const PopupMenuItem(
+                                                      value: 'delete',
+                                                      child: Row(children: [
+                                                        Icon(
+                                                            Icons
+                                                                .delete_outline_rounded,
+                                                            size: 16,
+                                                            color:
+                                                                AppColors.expense),
+                                                        SizedBox(width: 8),
+                                                        Text('Hapus',
+                                                            style: TextStyle(
+                                                                color: AppColors
+                                                                    .expense)),
+                                                      ]),
+                                                    ),
+                                                  ],
+                                                  onSelected: (val) {
+                                                    if (val == 'edit') {
+                                                      _openForm(item);
+                                                    } else {
+                                                      _showDeleteConfirmation(
+                                                          item);
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                  ),
                 ],
               );
             },

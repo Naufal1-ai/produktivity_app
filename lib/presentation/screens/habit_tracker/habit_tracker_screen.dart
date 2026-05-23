@@ -181,6 +181,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
           AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
       body: GridBackground(
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // ✅ Header konsisten
@@ -288,11 +289,25 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
                       );
                     }
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                      itemCount: habits.length,
-                      itemBuilder: (context, index) =>
-                          _buildHabitCard(context, habits[index], provider),
+                    return ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.white,
+                          ],
+                          stops: [0.0, 0.05],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                        itemCount: habits.length,
+                        itemBuilder: (context, index) =>
+                            _buildHabitCard(context, habits[index], provider),
+                      ),
                     );
                   },
                 ),

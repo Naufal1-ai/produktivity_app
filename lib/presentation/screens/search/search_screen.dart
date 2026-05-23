@@ -278,29 +278,43 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   Expanded(
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                      children: grouped.entries.map((entry) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SectionLabel(entry.key),
-                            ...entry.value.map(
-                              (tx) => TransactionTile(
-                                tx: tx,
-                                onEdit: () => showModalBottomSheet(
-                                  context: context,
-                                  isScrollControlled: true,
-                                  backgroundColor: Colors.transparent,
-                                  builder: (_) =>
-                                      TransactionFormSheet(existing: tx),
-                                ),
-                                onDelete: () => _repo.delete(tx.id),
-                              ),
-                            ),
+                    child: ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.white,
                           ],
-                        );
-                      }).toList(),
+                          stops: [0.0, 0.05],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                        children: grouped.entries.map((entry) {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SectionLabel(entry.key),
+                              ...entry.value.map(
+                                (tx) => TransactionTile(
+                                  tx: tx,
+                                  onEdit: () => showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    backgroundColor: Colors.transparent,
+                                    builder: (_) =>
+                                        TransactionFormSheet(existing: tx),
+                                  ),
+                                  onDelete: () => _repo.delete(tx.id),
+                                ),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
                 ],

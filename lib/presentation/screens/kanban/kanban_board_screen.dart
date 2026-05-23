@@ -50,6 +50,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
       body: GridBackground(
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // ✅ Header konsisten — sama dengan semua screen lain
@@ -167,16 +168,30 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                 ),
               ),
 
-              // ✅ Kolom kanban
+              // ✅ Kolom kanban dengan efek fade di bagian atas saat di-scroll
               Expanded(
                 child: Consumer<KanbanBoardProvider>(
                   builder: (context, provider, _) {
-                    return ListView(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                      children: kKanbanColumns.map((column) {
-                        final cards = _getCardsForColumn(column, provider);
-                        return _buildColumn(context, column, cards, provider);
-                      }).toList(),
+                    return ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent, // Memudar di tepi paling atas
+                            Colors.white,       // Solid penuh di bawahnya
+                          ],
+                          stops: [0.0, 0.06],   // Transisi pudar halus di 6% area teratas
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.dstIn,
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                        children: kKanbanColumns.map((column) {
+                          final cards = _getCardsForColumn(column, provider);
+                          return _buildColumn(context, column, cards, provider);
+                        }).toList(),
+                      ),
                     );
                   },
                 ),

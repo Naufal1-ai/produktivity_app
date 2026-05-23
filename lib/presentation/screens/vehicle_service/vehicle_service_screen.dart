@@ -119,51 +119,63 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                     final totalCost =
                         services.fold<double>(0.0, (sum, s) => sum + s.cost);
 
-                    return CustomScrollView(
-                      slivers: [
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _StatCard(
-                                    label: 'Total Riwayat',
-                                    value: '${services.length} servis',
-                                    icon: Icons.history_rounded,
-                                    color: AppColors.blueAccent,
-                                  ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _StatCard(
+                                  label: 'Total Riwayat',
+                                  value: '${services.length} servis',
+                                  icon: Icons.history_rounded,
+                                  color: AppColors.blueAccent,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _StatCard(
-                                    label: 'Perlu Servis',
-                                    value: '$dueCount kendaraan',
-                                    icon: Icons.warning_amber_rounded,
-                                    color: dueCount > 0
-                                        ? AppColors.expense
-                                        : AppColors.greenSuccess,
-                                  ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatCard(
+                                  label: 'Perlu Servis',
+                                  value: '$dueCount kendaraan',
+                                  icon: Icons.warning_amber_rounded,
+                                  color: dueCount > 0
+                                      ? AppColors.expense
+                                      : AppColors.greenSuccess,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _StatCard(
-                                    label: 'Total Biaya',
-                                    value: _currencyFormat.format(totalCost),
-                                    icon: Icons.payments_outlined,
-                                    color: AppColors.purple,
-                                    smallText: true,
-                                  ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _StatCard(
+                                  label: 'Total Biaya',
+                                  value: _currencyFormat.format(totalCost),
+                                  icon: Icons.payments_outlined,
+                                  color: AppColors.purple,
+                                  smallText: true,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
+                        Expanded(
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return const LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white,
+                                ],
+                                stops: [0.0, 0.05],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.dstIn,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+                              itemCount: services.length,
+                              itemBuilder: (context, index) {
                                 final service = services[index];
                                 return _ServiceCard(
                                   service: service,
@@ -173,7 +185,6 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                                       context, provider, service),
                                 );
                               },
-                              childCount: services.length,
                             ),
                           ),
                         ),

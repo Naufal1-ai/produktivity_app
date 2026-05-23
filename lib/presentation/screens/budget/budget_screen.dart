@@ -107,80 +107,94 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       .toList()
                     ..sort();
 
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
-                    children: [
-                      if (budgets.isNotEmpty) ...[
-                        const SectionLabel('Anggaran Aktif'),
-                        ...budgets.map((b) {
-                          final s = spent[b.category] ?? 0;
-                          return _BudgetTile(
-                            budget: b,
-                            spent: s,
-                            onTap: () =>
-                                _openBudgetForm(b.category, existing: b),
-                            onDelete: () => _budgetRepo.delete(b.id),
-                          );
-                        }),
-                      ],
-                      if (unbudgetedCats.isNotEmpty) ...[
-                        const SectionLabel('Pengeluaran Tanpa Anggaran'),
-                        ...unbudgetedCats.map((cat) {
-                          return _UnbudgetedTile(
-                            category: cat,
-                            spent: spent[cat]!,
-                            onTap: () => _openBudgetForm(cat),
-                          );
-                        }),
-                      ],
-                      const SectionLabel('Tambah Anggaran Kategori'),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: kTransactionCategories.map((cat) {
-                          final hasBudget = budgetedCats.contains(cat);
-                          return GestureDetector(
-                            onTap:
-                                hasBudget ? null : () => _openBudgetForm(cat),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: hasBudget
-                                    ? AppColors.blueDark
-                                    : AppColors.bgCard,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
+                  return ShaderMask(
+                    shaderCallback: (Rect bounds) {
+                      return const LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.white,
+                        ],
+                        stops: [0.0, 0.05],
+                      ).createShader(bounds);
+                    },
+                    blendMode: BlendMode.dstIn,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                      children: [
+                        if (budgets.isNotEmpty) ...[
+                          const SectionLabel('Anggaran Aktif'),
+                          ...budgets.map((b) {
+                            final s = spent[b.category] ?? 0;
+                            return _BudgetTile(
+                              budget: b,
+                              spent: s,
+                              onTap: () =>
+                                  _openBudgetForm(b.category, existing: b),
+                              onDelete: () => _budgetRepo.delete(b.id),
+                            );
+                          }),
+                        ],
+                        if (unbudgetedCats.isNotEmpty) ...[
+                          const SectionLabel('Pengeluaran Tanpa Anggaran'),
+                          ...unbudgetedCats.map((cat) {
+                            return _UnbudgetedTile(
+                              category: cat,
+                              spent: spent[cat]!,
+                              onTap: () => _openBudgetForm(cat),
+                            );
+                          }),
+                        ],
+                        const SectionLabel('Tambah Anggaran Kategori'),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: kTransactionCategories.map((cat) {
+                            final hasBudget = budgetedCats.contains(cat);
+                            return GestureDetector(
+                              onTap:
+                                  hasBudget ? null : () => _openBudgetForm(cat),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 8),
+                                decoration: BoxDecoration(
                                   color: hasBudget
-                                      ? AppColors.blueBorder
-                                      : AppColors.borderAccent,
+                                      ? AppColors.blueDark
+                                      : AppColors.bgCard,
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(
+                                    color: hasBudget
+                                        ? AppColors.blueBorder
+                                        : AppColors.borderAccent,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (hasBudget) ...[
+                                      Icon(Icons.check,
+                                          size: 12, color: AppColors.blueAccent),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Text(
+                                      cat,
+                                      style: TextStyle(
+                                        color: hasBudget
+                                            ? AppColors.blueAccent
+                                            : AppColors.textSecondary,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (hasBudget) ...[
-                                    Icon(Icons.check,
-                                        size: 12, color: AppColors.blueAccent),
-                                    const SizedBox(width: 4),
-                                  ],
-                                  Text(
-                                    cat,
-                                    style: TextStyle(
-                                      color: hasBudget
-                                          ? AppColors.blueAccent
-                                          : AppColors.textSecondary,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    ),
                   );
                 },
               );

@@ -100,6 +100,7 @@ class _TasksScreenState extends State<TasksScreen> {
           AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
       body: GridBackground(
         child: SafeArea(
+          bottom: false,
           child: Column(
             children: [
               // ✅ Header — sama persis dengan FinanceScreen
@@ -262,22 +263,36 @@ class _TasksScreenState extends State<TasksScreen> {
                                     ),
                                   ),
                                 )
-                              : ListView.separated(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 4, 16, 120),
-                                  itemCount: filteredTasks.length,
-                                  separatorBuilder: (_, __) =>
-                                      const SizedBox(height: 12),
-                                  itemBuilder: (context, index) {
-                                    final task = filteredTasks[index];
-                                    return _TaskCard(
-                                      task: task,
-                                      onToggleComplete: () =>
-                                          _toggleCompletion(task),
-                                      onEdit: () => _openTaskForm(task),
-                                      onDelete: () => _deleteTask(task.id),
-                                    );
+                              : ShaderMask(
+                                  shaderCallback: (Rect bounds) {
+                                    return const LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.white,
+                                      ],
+                                      stops: [0.0, 0.05],
+                                    ).createShader(bounds);
                                   },
+                                  blendMode: BlendMode.dstIn,
+                                  child: ListView.separated(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 12, 16, 120),
+                                    itemCount: filteredTasks.length,
+                                    separatorBuilder: (_, __) =>
+                                        const SizedBox(height: 12),
+                                    itemBuilder: (context, index) {
+                                      final task = filteredTasks[index];
+                                      return _TaskCard(
+                                        task: task,
+                                        onToggleComplete: () =>
+                                            _toggleCompletion(task),
+                                        onEdit: () => _openTaskForm(task),
+                                        onDelete: () => _deleteTask(task.id),
+                                      );
+                                    },
+                                  ),
                                 ),
                         ),
                       ],

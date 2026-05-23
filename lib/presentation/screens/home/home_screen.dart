@@ -121,282 +121,302 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context, constraints) {
                   final isDesktop = constraints.maxWidth >= 1024;
 
-                  return CustomScrollView(
-                    slivers: [
-                      // ── Header ──────────────────────────────────────────────
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (!isDesktop)
-                                IconButton(
-                                  icon: const Icon(Icons.menu),
-                                  color: AppColors.textPrimary,
-                                  onPressed: widget.onOpenDrawer,
-                                  padding: const EdgeInsets.only(right: 12),
-                                  constraints: const BoxConstraints(),
-                                ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Dashboard Overview',
-                                      style: TextStyle(
-                                          color: AppColors.textPrimary,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '$_greeting, $_userEmail.',
-                                      style: TextStyle(
-                                          color: AppColors.textMuted,
-                                          fontSize: 13),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    const _DashboardClock(),
-                                  ],
-                                ),
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── Header (Fixed) ──────────────────────────────────────────────
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (!isDesktop)
+                              IconButton(
+                                icon: const Icon(Icons.menu),
+                                color: AppColors.textPrimary,
+                                onPressed: widget.onOpenDrawer,
+                                padding: const EdgeInsets.only(right: 12),
+                                constraints: const BoxConstraints(),
                               ),
-                              if (!isDesktop)
-                                Consumer<PomodoroProvider>(
-                                  builder: (context, provider, _) => Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (provider.isRunning) ...[
-                                        _buildPomodoroChip(provider),
-                                        const SizedBox(width: 8),
-                                      ],
-                                      IconButton(
-                                        icon: Icon(
-                                          widget.isDarkMode
-                                              ? Icons.wb_sunny_outlined
-                                              : Icons.nights_stay_outlined,
-                                          size: 20,
-                                        ),
-                                        color: AppColors.textMuted,
-                                        onPressed: widget.onToggleTheme,
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else
-                                Consumer<PomodoroProvider>(
-                                  builder: (context, provider, _) => Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (provider.isRunning) ...[
-                                        _buildPomodoroChip(provider),
-                                        const SizedBox(width: 8),
-                                      ],
-                                      ElevatedButton.icon(
-                                        onPressed: () => _openForm(),
-                                        icon: const Icon(Icons.add, size: 18),
-                                        label: const Text('Tambah Transaksi'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColors.blueMid,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 16),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // ── Dashboard Content ──────────────────────────────────
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              DashboardSummaryCards(
-                                balance: balance,
-                                totalIncome: totalIncome,
-                                totalExpense: totalExpense,
-                                isDesktop: isDesktop,
-                              ),
-                              const SizedBox(height: 24),
-
-                              // ── Kanban, Pomodoro, Habit ──────────────────
-                              if (isDesktop) ...[
-                                IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                          child: _buildKanbanOverview(context)),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                          child:
-                                              _buildPomodoroOverview(context)),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                IntrinsicHeight(
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      Expanded(
-                                          child: _buildHabitOverview(context)),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                          child:
-                                              _buildLendingOverview(context)),
-                                    ],
-                                  ),
-                                ),
-                              ] else
-                                Column(
-                                  children: [
-                                    _buildKanbanOverview(context),
-                                    const SizedBox(height: 16),
-                                    _buildPomodoroOverview(context),
-                                    const SizedBox(height: 16),
-                                    _buildHabitOverview(context),
-                                    const SizedBox(height: 16),
-                                    _buildLendingOverview(context),
-                                  ],
-                                ),
-
-                              const SizedBox(height: 24),
-
-                              // ── Charts ───────────────────────────────────
-                              if (isDesktop)
-                                SizedBox(
-                                  height: 320,
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: DashboardLineChart(
-                                            transactions: txList,
-                                            month: _selectedMonth),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      Expanded(
-                                        flex: 1,
-                                        child: DashboardPieChart(
-                                            transactions: txList),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else
-                                Column(
-                                  children: [
-                                    SizedBox(
-                                      height: 300,
-                                      child: DashboardLineChart(
-                                          transactions: txList,
-                                          month: _selectedMonth),
-                                    ),
-                                    const SizedBox(height: 24),
-                                    SizedBox(
-                                      height: 240,
-                                      child: DashboardPieChart(
-                                          transactions: txList),
-                                    ),
-                                  ],
-                                ),
-                              const SizedBox(height: 32),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // ── Action & Title for Transactions ────────────────────
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Riwayat Transaksi',
-                                style: TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              OutlinedButton.icon(
-                                onPressed: _pickMonth,
-                                icon: Icon(Icons.calendar_month_outlined,
-                                    size: 14, color: AppColors.textSecondary),
-                                label: Text(
-                                  DateUtils2.formatMonth(_selectedMonth),
-                                  style: TextStyle(
-                                      color: AppColors.textSecondary,
-                                      fontSize: 11),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
-                                  side:
-                                      BorderSide(color: AppColors.borderAccent),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                      // ── Transaction list ───────────────────────────────────
-                      if (txList.isEmpty) ...[
-                        SliverToBoxAdapter(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(32.0),
+                            Expanded(
                               child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('💸',
-                                      style: TextStyle(fontSize: 48)),
-                                  const SizedBox(height: 12),
-                                  Text('Belum ada transaksi bulan ini',
-                                      style: TextStyle(
-                                          color: AppColors.textMuted,
-                                          fontSize: 14)),
+                                  Text(
+                                    'Dashboard Overview',
+                                    style: TextStyle(
+                                        color: AppColors.textPrimary,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '$_greeting, $_userEmail.',
+                                    style: TextStyle(
+                                        color: AppColors.textMuted,
+                                        fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const _DashboardClock(),
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                        const SliverToBoxAdapter(child: SizedBox(height: 140)),
-                      ] else ...[
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (ctx, i) => TransactionTile(
-                                tx: txList[i],
-                                onEdit: () => _openForm(txList[i]),
-                                onDelete: () => _delete(txList[i].id),
+                            if (!isDesktop)
+                              Consumer<PomodoroProvider>(
+                                builder: (context, provider, _) => Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (provider.isRunning) ...[
+                                      _buildPomodoroChip(provider),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    IconButton(
+                                      icon: Icon(
+                                        widget.isDarkMode
+                                            ? Icons.wb_sunny_outlined
+                                            : Icons.nights_stay_outlined,
+                                        size: 20,
+                                      ),
+                                      color: AppColors.textMuted,
+                                      onPressed: widget.onToggleTheme,
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Consumer<PomodoroProvider>(
+                                builder: (context, provider, _) => Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (provider.isRunning) ...[
+                                      _buildPomodoroChip(provider),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    ElevatedButton.icon(
+                                      onPressed: () => _openForm(),
+                                      icon: const Icon(Icons.add, size: 18),
+                                      label: const Text('Tambah Transaksi'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.blueMid,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              childCount: txList.length,
-                            ),
+                          ],
+                        ),
+                      ),
+
+                      // ── Scrollable Body ───────────────────────────────────────────
+                      Expanded(
+                        child: ShaderMask(
+                          shaderCallback: (Rect bounds) {
+                            return const LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.white,
+                              ],
+                              stops: [0.0, 0.05],
+                            ).createShader(bounds);
+                          },
+                          blendMode: BlendMode.dstIn,
+                          child: CustomScrollView(
+                            slivers: [
+                              // ── Kanban, Pomodoro, Habit, Charts ───────────────────────
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      DashboardSummaryCards(
+                                        balance: balance,
+                                        totalIncome: totalIncome,
+                                        totalExpense: totalExpense,
+                                        isDesktop: isDesktop,
+                                      ),
+                                      const SizedBox(height: 24),
+
+                                      // ── Kanban, Pomodoro, Habit ──
+                                      if (isDesktop) ...[
+                                        IntrinsicHeight(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Expanded(
+                                                  child: _buildKanbanOverview(context)),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                  child:
+                                                      _buildPomodoroOverview(context)),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        IntrinsicHeight(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Expanded(
+                                                  child: _buildHabitOverview(context)),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                  child:
+                                                      _buildLendingOverview(context)),
+                                            ],
+                                          ),
+                                        ),
+                                      ] else
+                                        Column(
+                                          children: [
+                                            _buildKanbanOverview(context),
+                                            const SizedBox(height: 16),
+                                            _buildPomodoroOverview(context),
+                                            const SizedBox(height: 16),
+                                            _buildHabitOverview(context),
+                                            const SizedBox(height: 16),
+                                            _buildLendingOverview(context),
+                                          ],
+                                        ),
+
+                                      const SizedBox(height: 24),
+
+                                      // ── Charts ──
+                                      if (isDesktop)
+                                        SizedBox(
+                                          height: 320,
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 2,
+                                                child: DashboardLineChart(
+                                                    transactions: txList,
+                                                    month: _selectedMonth),
+                                              ),
+                                              const SizedBox(width: 24),
+                                              Expanded(
+                                                flex: 1,
+                                                child: DashboardPieChart(
+                                                    transactions: txList),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      else
+                                        Column(
+                                          children: [
+                                            SizedBox(
+                                              height: 300,
+                                              child: DashboardLineChart(
+                                                  transactions: txList,
+                                                  month: _selectedMonth),
+                                            ),
+                                            const SizedBox(height: 24),
+                                            SizedBox(
+                                              height: 240,
+                                              child: DashboardPieChart(
+                                                  transactions: txList),
+                                            ),
+                                          ],
+                                        ),
+                                      const SizedBox(height: 32),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // ── Action & Title for Transactions ──────────────────────
+                              SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Riwayat Transaksi',
+                                        style: TextStyle(
+                                          color: AppColors.textPrimary,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      OutlinedButton.icon(
+                                        onPressed: _pickMonth,
+                                        icon: Icon(Icons.calendar_month_outlined,
+                                            size: 14, color: AppColors.textSecondary),
+                                        label: Text(
+                                          DateUtils2.formatMonth(_selectedMonth),
+                                          style: TextStyle(
+                                              color: AppColors.textSecondary,
+                                              fontSize: 11),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 12, vertical: 8),
+                                          side:
+                                              BorderSide(color: AppColors.borderAccent),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+                              // ── Transaction list ─────────────────────────────────────
+                              if (txList.isEmpty) ...[
+                                SliverToBoxAdapter(
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(32.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text('💸',
+                                              style: TextStyle(fontSize: 48)),
+                                          const SizedBox(height: 12),
+                                          Text('Belum ada transaksi bulan ini',
+                                              style: TextStyle(
+                                                  color: AppColors.textMuted,
+                                                  fontSize: 14)),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                              ] else ...[
+                                SliverPadding(
+                                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 140),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (ctx, i) => TransactionTile(
+                                        tx: txList[i],
+                                        onEdit: () => _openForm(txList[i]),
+                                        onDelete: () => _delete(txList[i].id),
+                                      ),
+                                      childCount: txList.length,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ],
                   );
                 },
