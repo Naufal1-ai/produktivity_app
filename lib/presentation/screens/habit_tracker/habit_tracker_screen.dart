@@ -79,7 +79,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedHabitCategory,
+                initialValue: _selectedHabitCategory,
                 items: kHabitCategories
                     .map(
                         (cat) => DropdownMenuItem(value: cat, child: Text(cat)))
@@ -99,7 +99,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _selectedFrequency,
+                initialValue: _selectedFrequency,
                 items: kHabitFrequencies
                     .map((freq) =>
                         DropdownMenuItem(value: freq, child: Text(freq)))

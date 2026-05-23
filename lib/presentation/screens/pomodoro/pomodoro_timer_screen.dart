@@ -287,7 +287,7 @@ class _PomodoroTimerScreenState extends State<PomodoroTimerScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Icon(Icons.check_circle_outline_rounded,
+                               const Icon(Icons.check_circle_outline_rounded,
                                   color: AppColors.greenSuccess, size: 20),
                               const SizedBox(height: 8),
                               Text(
@@ -366,7 +366,7 @@ class _PomodoroTimerScreenState extends State<PomodoroTimerScreen> {
                                             .withValues(alpha: 0.12),
                                         shape: BoxShape.circle,
                                       ),
-                                      child: Icon(Icons.check_rounded,
+                                      child: const Icon(Icons.check_rounded,
                                           color: AppColors.greenSuccess,
                                           size: 14),
                                     ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/core/utils/currency_utils.dart';
@@ -198,50 +199,128 @@ class TransactionTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: tx.isIncome
-                      ? (AppColors.isDark ? AppColors.blueDark : AppColors.blueAccent.withValues(alpha: 0.12))
-                      : (AppColors.isDark ? const Color(0xFF1F0E0E) : AppColors.expense.withValues(alpha: 0.1)),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                    child: Text(_emoji, style: const TextStyle(fontSize: 18))),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(tx.category,
-                        style: TextStyle(
-                            color: AppColors.textPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500)),
-                    const SizedBox(height: 2),
-                    Text(
-                      tx.note.isEmpty
-                          ? DateUtils2.formatDisplay(tx.date)
-                          : '${tx.note} · ${DateUtils2.formatDisplay(tx.date)}',
-                      style: TextStyle(color: AppColors.textDim, fontSize: 12),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+              Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: tx.isIncome
+                          ? (AppColors.isDark ? AppColors.blueDark : AppColors.blueAccent.withValues(alpha: 0.12))
+                          : (AppColors.isDark ? const Color(0xFF1F0E0E) : AppColors.expense.withValues(alpha: 0.1)),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
-                ),
+                    child: Center(
+                        child: Text(_emoji, style: const TextStyle(fontSize: 18))),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tx.category,
+                            style: TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500)),
+                        const SizedBox(height: 2),
+                        Text(
+                          tx.note.isEmpty
+                              ? DateUtils2.formatDisplay(tx.date)
+                              : '${tx.note} · ${DateUtils2.formatDisplay(tx.date)}',
+                          style: TextStyle(color: AppColors.textDim, fontSize: 12),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    CurrencyUtils.formatSigned(tx.amount, tx.type),
+                    style: TextStyle(
+                      color: tx.isIncome ? AppColors.income : AppColors.expense,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                CurrencyUtils.formatSigned(tx.amount, tx.type),
-                style: TextStyle(
-                  color: tx.isIncome ? AppColors.income : AppColors.expense,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+              if (tx.imageUrl != null && tx.imageUrl!.isNotEmpty) ...[
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => Dialog(
+                        backgroundColor: Colors.transparent,
+                        insetPadding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: IconButton(
+                                icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                onPressed: () => Navigator.pop(ctx),
+                              ),
+                            ),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: tx.imageUrl!.startsWith('data:image/')
+                                  ? Image.memory(
+                                      base64Decode(tx.imageUrl!.split(',').last),
+                                      fit: BoxFit.contain,
+                                    )
+                                  : Image.network(
+                                      tx.imageUrl!,
+                                      fit: BoxFit.contain,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        color: AppColors.bgCard,
+                                        child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                      ),
+                                    ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Hero(
+                    tag: 'transaction_img_${tx.id}',
+                    child: Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: AppColors.borderAccent),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: tx.imageUrl!.startsWith('data:image/')
+                            ? Image.memory(
+                                base64Decode(tx.imageUrl!.split(',').last),
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 120,
+                              )
+                            : Image.network(
+                                tx.imageUrl!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: 120,
+                                errorBuilder: (context, error, stackTrace) => Container(
+                                  color: AppColors.bgCard,
+                                  child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

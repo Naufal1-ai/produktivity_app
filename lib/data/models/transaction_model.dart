@@ -23,6 +23,7 @@ class TransactionModel {
   final String note;
   final DateTime date;
   final DateTime createdAt;
+  final String? imageUrl;
 
   TransactionModel({
     required this.id,
@@ -32,6 +33,7 @@ class TransactionModel {
     required this.note,
     required this.date,
     required this.createdAt,
+    this.imageUrl,
   });
 
   bool get isIncome => type == 'pemasukan';
@@ -48,6 +50,7 @@ class TransactionModel {
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      imageUrl: data['imageUrl'] as String?,
     );
   }
 
@@ -58,6 +61,7 @@ class TransactionModel {
         'note': note,
         'date': Timestamp.fromDate(date),
         'createdAt': FieldValue.serverTimestamp(),
+        'imageUrl': imageUrl,
       };
 
   TransactionModel copyWith({
@@ -66,6 +70,7 @@ class TransactionModel {
     String? category,
     String? note,
     DateTime? date,
+    String? imageUrl,
   }) =>
       TransactionModel(
         id: id,
@@ -75,5 +80,6 @@ class TransactionModel {
         note: note ?? this.note,
         date: date ?? this.date,
         createdAt: createdAt,
+        imageUrl: imageUrl ?? this.imageUrl,
       );
 }

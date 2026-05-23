@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/core/utils/currency_utils.dart';
+import 'package:productivity/core/utils/image_helper.dart';
 import 'package:productivity/data/models/transaction_model.dart';
 import 'package:productivity/data/repositories/transaction_repository.dart';
 
@@ -23,6 +27,29 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
   String? _category;
   DateTime _date = DateTime.now();
   bool _loading = false;
+
+  File? _imageFile;
+  bool _deleteImage = false;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 30,
+        maxWidth: 500,
+        maxHeight: 500,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _deleteImage = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
+  }
 
   bool get _isEditing => widget.existing != null;
   List<String> get _categories => kTransactionCategories;
@@ -51,6 +78,13 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
     if (_amountCtrl.text.isEmpty || _category == null) return;
     setState(() => _loading = true);
     try {
+      String? finalImageUrl = widget.existing?.imageUrl;
+      if (_deleteImage) {
+        finalImageUrl = '';
+      } else if (_imageFile != null) {
+        finalImageUrl = await ImageHelper.fileToBase64(_imageFile!);
+      }
+
       final tx = TransactionModel(
         id: widget.existing?.id ?? '',
         amount: double.parse(_amountCtrl.text.replaceAll('.', '')),
@@ -59,6 +93,7 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
         note: _noteCtrl.text.trim(),
         date: _date,
         createdAt: widget.existing?.createdAt ?? DateTime.now(),
+        imageUrl: finalImageUrl,
       );
       if (_isEditing) {
         await _repo.update(tx);
@@ -153,7 +188,7 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
 
           // Category dropdown
           DropdownButtonFormField<String>(
-            value: _categories.contains(_category) ? _category : null,
+            initialValue: _categories.contains(_category) ? _category : null,
             dropdownColor: AppColors.bgCard,
             style: TextStyle(color: AppColors.textPrimary, fontSize: 14),
             decoration: const InputDecoration(labelText: 'Kategori'),
@@ -211,6 +246,133 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
               ),
             ),
           ),
+          const SizedBox(height: 16),
+
+          // Foto Transaksi (Opsional)
+          Text(
+            'Foto Transaksi (Opsional)',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (_imageFile != null || (widget.existing?.imageUrl != null && widget.existing!.imageUrl!.isNotEmpty && !_deleteImage)) ...[
+            Container(
+              height: 140,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.borderAccent),
+              ),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: _imageFile != null
+                          ? Image.file(
+                              _imageFile!,
+                              fit: BoxFit.cover,
+                            )
+                          : widget.existing!.imageUrl!.startsWith('data:image/')
+                              ? Image.memory(
+                                  base64Decode(widget.existing!.imageUrl!.split(',').last),
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.network(
+                                  widget.existing!.imageUrl!,
+                                  fit: BoxFit.cover,
+                                ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _imageFile = null;
+                          if (widget.existing?.imageUrl != null && widget.existing!.imageUrl!.isNotEmpty) {
+                            _deleteImage = true;
+                          }
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _pickImage(ImageSource.camera),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgCard,
+                        border: Border.all(color: AppColors.borderAccent),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt_outlined, color: AppColors.blueAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Kamera',
+                            style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _pickImage(ImageSource.gallery),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgCard,
+                        border: Border.all(color: AppColors.borderAccent),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.photo_library_outlined, color: AppColors.blueAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Galeri',
+                            style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
 
           // Save button

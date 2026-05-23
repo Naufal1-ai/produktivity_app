@@ -33,10 +33,15 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     Color(0xFF94A3B8),
   ];
 
+  late Stream<List<TransactionModel>> _transactionStream;
+  late Stream<List<TransactionModel>> _allTransactionsStream;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _transactionStream = _repo.watchByMonth(_selectedMonth);
+    _allTransactionsStream = _repo.watchAll();
   }
 
   @override
@@ -128,7 +133,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
         Expanded(
           child: StreamBuilder<List<TransactionModel>>(
-            stream: _repo.watchByMonth(_selectedMonth),
+            stream: _transactionStream,
             builder: (context, snapshot) {
               final txList = snapshot.data ?? [];
               return TabBarView(
@@ -285,7 +290,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
 
   Widget _buildBarTab() {
     return StreamBuilder<List<TransactionModel>>(
-      stream: _repo.watchAll(),
+      stream: _allTransactionsStream,
       builder: (context, snapshot) {
         final allTx = snapshot.data ?? [];
         if (allTx.isEmpty) {
@@ -580,7 +585,10 @@ class _StatisticsScreenState extends State<StatisticsScreen>
                           ? Icon(Icons.check, color: AppColors.blueAccent)
                           : null,
                       onTap: () {
-                        setState(() => _selectedMonth = m);
+                        setState(() {
+                          _selectedMonth = m;
+                          _transactionStream = _repo.watchByMonth(m);
+                        });
                         Navigator.pop(ctx);
                       },
                     ),

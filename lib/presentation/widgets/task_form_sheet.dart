@@ -159,7 +159,7 @@ class _TaskFormSheetState extends State<TaskFormSheet> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _category,
+            initialValue: _category,
             decoration: const InputDecoration(labelText: 'Kategori'),
             items: kTaskCategories
                 .map((category) => DropdownMenuItem(
@@ -173,7 +173,7 @@ class _TaskFormSheetState extends State<TaskFormSheet> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _priority,
+            initialValue: _priority,
             decoration: const InputDecoration(labelText: 'Prioritas'),
             items: kTaskPriorities
                 .map((priority) => DropdownMenuItem(

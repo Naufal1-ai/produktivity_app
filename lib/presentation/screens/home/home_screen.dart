@@ -46,6 +46,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final _lendingRepo = LendingRepository();
   final _auth = FirebaseAuth.instance;
   DateTime _selectedMonth = DateTime.now();
+  late Stream<List<TransactionModel>> _transactionStream;
+  late final Stream<List<LendingModel>> _lendingStream;
 
   String get _greeting {
     final h = DateTime.now().hour;
@@ -60,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _transactionStream = _repo.watchByMonth(_selectedMonth);
+    _lendingStream = _lendingRepo.watchAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<KanbanBoardProvider>().initialize();
       context.read<PomodoroProvider>().initialize();
@@ -102,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           bottom: false,
           child: StreamBuilder<List<TransactionModel>>(
-            stream: _repo.watchByMonth(_selectedMonth),
+            stream: _transactionStream,
             builder: (context, snapshot) {
               final txList = snapshot.data ?? [];
               final totalIncome = txList
@@ -405,217 +409,226 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildKanbanOverview(BuildContext context) {
-    final kanbanProvider = context.watch<KanbanBoardProvider>();
-    final totalCards = kanbanProvider.getTotalCards();
-    final completedCards = kanbanProvider.getCompletedCards();
-    final progress = kanbanProvider.getProgressPercentage();
+    return Consumer<KanbanBoardProvider>(
+      builder: (context, kanbanProvider, child) {
+        final totalCards = kanbanProvider.getTotalCards();
+        final completedCards = kanbanProvider.getCompletedCards();
+        final progress = kanbanProvider.getProgressPercentage();
 
-    return GlassContainer(
-      borderRadius: 24,
-      padding: const EdgeInsets.all(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const KanbanBoardScreen()),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Kanban',
-                    style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                Text('Lihat detail',
-                    style: TextStyle(
-                        color: AppColors.blueAccent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
-              ],
+        return GlassContainer(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const KanbanBoardScreen()),
             ),
-            const SizedBox(height: 16),
-            Text('Ringkasan tugas saat ini',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-            const SizedBox(height: 16),
-            Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('$totalCards total kartu',
-                          style: TextStyle(
-                              color: AppColors.textPrimary, fontSize: 14)),
-                      const SizedBox(height: 6),
-                      Text('$completedCards selesai',
-                          style: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12)),
-                    ],
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Kanban',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                    Text('Lihat detail',
+                        style: TextStyle(
+                            color: AppColors.blueAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ],
                 ),
-                SizedBox(
-                  width: 72,
-                  height: 72,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      CircularProgressIndicator(
-                        value: progress / 100,
-                        backgroundColor: AppColors.borderAccent,
-                        color: AppColors.greenSuccess,
-                        strokeWidth: 6,
+                const SizedBox(height: 16),
+                Text('Ringkasan tugas saat ini',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$totalCards total kartu',
+                              style: TextStyle(
+                                  color: AppColors.textPrimary, fontSize: 14)),
+                          const SizedBox(height: 6),
+                          Text('$completedCards selesai',
+                              style: TextStyle(
+                                  color: AppColors.textSecondary, fontSize: 12)),
+                        ],
                       ),
-                      Text('${progress.toStringAsFixed(0)}%',
-                          style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      width: 72,
+                      height: 72,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: progress / 100,
+                            backgroundColor: AppColors.borderAccent,
+                            color: AppColors.greenSuccess,
+                            strokeWidth: 6,
+                          ),
+                          Text('${progress.toStringAsFixed(0)}%',
+                              style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildPomodoroOverview(BuildContext context) {
-    final pomodoroProvider = context.watch<PomodoroProvider>();
-    final remaining =
-        pomodoroProvider.formatTime(pomodoroProvider.remainingSeconds);
-    final currentTask = pomodoroProvider.currentTask.isNotEmpty
-        ? pomodoroProvider.currentTask
-        : 'Belum ada tugas aktif';
-    final statusLabel = pomodoroProvider.isRunning
-        ? 'Berjalan (${pomodoroProvider.isWorkSession ? 'Fokus' : 'Istirahat'})'
-        : 'Tidak berjalan';
+    return Consumer<PomodoroProvider>(
+      builder: (context, pomodoroProvider, child) {
+        final remaining =
+            pomodoroProvider.formatTime(pomodoroProvider.remainingSeconds);
+        final currentTask = pomodoroProvider.currentTask.isNotEmpty
+            ? pomodoroProvider.currentTask
+            : 'Belum ada tugas aktif';
+        final statusLabel = pomodoroProvider.isRunning
+            ? 'Berjalan (${pomodoroProvider.isWorkSession ? 'Fokus' : 'Istirahat'})'
+            : 'Tidak berjalan';
 
-    return GlassContainer(
-      borderRadius: 24,
-      padding: const EdgeInsets.all(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const PomodoroTimerScreen()),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return GlassContainer(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const PomodoroTimerScreen()),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Pomodoro',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Pomodoro',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                    Chip(
+                      label: Text(statusLabel,
+                          style: TextStyle(
+                              color: AppColors.textPrimary, fontSize: 12)),
+                      backgroundColor: pomodoroProvider.isRunning
+                          ? AppColors.greenSuccess.withValues(alpha: 0.16)
+                          : AppColors.borderAccent,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text('Sisa waktu',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                const SizedBox(height: 10),
+                Text(remaining,
                     style: TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 16,
+                        fontSize: 34,
                         fontWeight: FontWeight.bold)),
-                Chip(
-                  label: Text(statusLabel,
-                      style: TextStyle(
-                          color: AppColors.textPrimary, fontSize: 12)),
-                  backgroundColor: pomodoroProvider.isRunning
-                      ? AppColors.greenSuccess.withValues(alpha: 0.16)
-                      : AppColors.borderAccent,
-                ),
+                const SizedBox(height: 10),
+                Text(currentTask,
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
               ],
             ),
-            const SizedBox(height: 16),
-            Text('Sisa waktu',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-            const SizedBox(height: 10),
-            Text(remaining,
-                style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 34,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Text(currentTask,
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildHabitOverview(BuildContext context) {
-    final habitProvider = context.watch<HabitTrackerProvider>();
-    final totalHabits = habitProvider.habits.length;
-    final completedToday = habitProvider.getCompletedHabitsToday();
-    final streak = habitProvider.getStreak();
+    return Consumer<HabitTrackerProvider>(
+      builder: (context, habitProvider, child) {
+        final totalHabits = habitProvider.habits.length;
+        final completedToday = habitProvider.getCompletedHabitsToday();
+        final streak = habitProvider.getStreak();
 
-    return GlassContainer(
-      borderRadius: 24,
-      padding: const EdgeInsets.all(20),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const HabitTrackerScreen()),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return GlassContainer(
+          borderRadius: 24,
+          padding: const EdgeInsets.all(20),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const HabitTrackerScreen()),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Habit Tracker',
-                    style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold)),
-                Text('Lihat detail',
-                    style: TextStyle(
-                        color: AppColors.blueAccent,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Habit Tracker',
+                        style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold)),
+                    Text('Lihat detail',
+                        style: TextStyle(
+                            color: AppColors.blueAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text('Status kebiasaan hari ini',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('$completedToday selesai hari ini',
+                              style: TextStyle(
+                                  color: AppColors.textPrimary, fontSize: 14)),
+                          const SizedBox(height: 6),
+                          Text('$totalHabits kebiasaan aktif',
+                              style: TextStyle(
+                                  color: AppColors.textSecondary, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.blueAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text('Streak $streak hari',
+                          style:
+                              TextStyle(color: AppColors.blueAccent, fontSize: 12)),
+                    ),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            Text('Status kebiasaan hari ini',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 13)),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('$completedToday selesai hari ini',
-                          style: TextStyle(
-                              color: AppColors.textPrimary, fontSize: 14)),
-                      const SizedBox(height: 6),
-                      Text('$totalHabits kebiasaan aktif',
-                          style: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 12)),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.blueAccent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text('Streak $streak hari',
-                      style:
-                          TextStyle(color: AppColors.blueAccent, fontSize: 12)),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildLendingOverview(BuildContext context) {
     return StreamBuilder<List<LendingModel>>(
-      stream: _lendingRepo.watchAll(),
+      stream: _lendingStream,
       builder: (context, snapshot) {
         final items = snapshot.data ?? [];
         final activeCount = items.where((i) => !i.isReturned).length;

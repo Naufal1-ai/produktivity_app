@@ -15,6 +15,10 @@ class KanbanCard {
   final int order;
   final DateTime createdAt;
   final DateTime? updatedAt;
+  final String? taskId;
+  final DateTime? dueDate;
+  final String? category;
+  final String? priority;
 
   KanbanCard({
     required this.id,
@@ -24,6 +28,10 @@ class KanbanCard {
     required this.order,
     required this.createdAt,
     this.updatedAt,
+    this.taskId,
+    this.dueDate,
+    this.category,
+    this.priority,
   });
 
   factory KanbanCard.fromDoc(DocumentSnapshot doc) {
@@ -40,6 +48,12 @@ class KanbanCard {
       updatedAt: data['updatedAt'] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : null,
+      taskId: data['taskId'] as String?,
+      dueDate: data['dueDate'] != null
+          ? (data['dueDate'] as Timestamp).toDate()
+          : null,
+      category: data['category'] as String?,
+      priority: data['priority'] as String?,
     );
   }
 
@@ -50,6 +64,10 @@ class KanbanCard {
         'order': order,
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
+        'taskId': taskId,
+        'dueDate': dueDate != null ? Timestamp.fromDate(dueDate!) : null,
+        'category': category,
+        'priority': priority,
       };
 
   KanbanCard copyWith({
@@ -57,6 +75,10 @@ class KanbanCard {
     String? description,
     String? column,
     int? order,
+    String? taskId,
+    DateTime? dueDate,
+    String? category,
+    String? priority,
   }) {
     return KanbanCard(
       id: id,
@@ -66,6 +88,10 @@ class KanbanCard {
       order: order ?? this.order,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      taskId: taskId ?? this.taskId,
+      dueDate: dueDate ?? this.dueDate,
+      category: category ?? this.category,
+      priority: priority ?? this.priority,
     );
   }
 }

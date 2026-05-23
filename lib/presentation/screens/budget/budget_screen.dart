@@ -21,6 +21,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
   final _budgetRepo = BudgetRepository();
   final _txRepo = TransactionRepository();
   DateTime _selectedMonth = DateTime.now();
+  late Stream<List<BudgetModel>> _budgetStream;
+  late Stream<List<TransactionModel>> _txStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _budgetStream = _budgetRepo.watchByMonth(_selectedMonth);
+    _txStream = _txRepo.watchByMonth(_selectedMonth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +87,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
         // Content
         Expanded(
           child: StreamBuilder<List<BudgetModel>>(
-            stream: _budgetRepo.watchByMonth(_selectedMonth),
+            stream: _budgetStream,
             builder: (context, budgetSnap) {
               return StreamBuilder<List<TransactionModel>>(
-                stream: _txRepo.watchByMonth(_selectedMonth),
+                stream: _txStream,
                 builder: (context, txSnap) {
                   final budgets = budgetSnap.data ?? [];
                   final txList = txSnap.data ?? [];
@@ -309,7 +318,11 @@ class _BudgetScreenState extends State<BudgetScreen> {
                           ? Icon(Icons.check, color: AppColors.blueAccent)
                           : null,
                       onTap: () {
-                        setState(() => _selectedMonth = m);
+                        setState(() {
+                          _selectedMonth = m;
+                          _budgetStream = _budgetRepo.watchByMonth(m);
+                          _txStream = _txRepo.watchByMonth(m);
+                        });
                         Navigator.pop(ctx);
                       },
                     ),

@@ -9,6 +9,7 @@ class LendingModel {
   final bool isReturned;
   final String category;
   final String note;
+  final String? imageUrl;
 
   LendingModel({
     required this.id,
@@ -19,6 +20,7 @@ class LendingModel {
     this.isReturned = false,
     required this.category,
     this.note = '',
+    this.imageUrl,
   });
 
   Map<String, dynamic> toMap() {
@@ -30,6 +32,7 @@ class LendingModel {
       'isReturned': isReturned,
       'category': category,
       'note': note,
+      'imageUrl': imageUrl,
     };
   }
 
@@ -46,6 +49,30 @@ class LendingModel {
       isReturned: data['isReturned'] ?? false,
       category: data['category'] ?? 'Lainnya',
       note: data['note'] ?? '',
+      imageUrl: data['imageUrl'] as String?,
+    );
+  }
+
+  LendingModel copyWith({
+    String? itemName,
+    String? borrowerName,
+    DateTime? borrowDate,
+    DateTime? targetReturnDate,
+    bool? isReturned,
+    String? category,
+    String? note,
+    String? imageUrl,
+  }) {
+    return LendingModel(
+      id: id,
+      itemName: itemName ?? this.itemName,
+      borrowerName: borrowerName ?? this.borrowerName,
+      borrowDate: borrowDate ?? this.borrowDate,
+      targetReturnDate: targetReturnDate ?? this.targetReturnDate,
+      isReturned: isReturned ?? this.isReturned,
+      category: category ?? this.category,
+      note: note ?? this.note,
+      imageUrl: imageUrl ?? this.imageUrl,
     );
   }
 }

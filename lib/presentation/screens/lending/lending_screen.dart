@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:productivity/core/theme/app_theme.dart';
@@ -297,12 +298,12 @@ class _LendingScreenState extends State<LendingScreen> {
                                                         ),
                                                       ),
                                                       if (item.isReturned)
-                                                        _Badge(
+                                                        const _Badge(
                                                             'Dikembalikan',
                                                             AppColors
                                                                 .greenSuccess)
                                                       else if (isOverdue)
-                                                        _Badge('Terlambat',
+                                                        const _Badge('Terlambat',
                                                             AppColors.expense),
                                                     ],
                                                   ),
@@ -378,6 +379,75 @@ class _LendingScreenState extends State<LendingScreen> {
                                                       ),
                                                     ],
                                                   ),
+                                                  if (item.imageUrl != null && item.imageUrl!.isNotEmpty) ...[
+                                                    const SizedBox(height: 10),
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (ctx) => Dialog(
+                                                            backgroundColor: Colors.transparent,
+                                                            insetPadding: const EdgeInsets.all(16),
+                                                            child: Column(
+                                                              mainAxisSize: MainAxisSize.min,
+                                                              children: [
+                                                                Align(
+                                                                  alignment: Alignment.topRight,
+                                                                  child: IconButton(
+                                                                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                                                    onPressed: () => Navigator.pop(ctx),
+                                                                  ),
+                                                                ),
+                                                                ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(16),
+                                                                  child: item.imageUrl!.startsWith('data:image/')
+                                                                      ? Image.memory(
+                                                                          base64Decode(item.imageUrl!.split(',').last),
+                                                                          fit: BoxFit.contain,
+                                                                        )
+                                                                      : Image.network(
+                                                                          item.imageUrl!,
+                                                                          fit: BoxFit.contain,
+                                                                        ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Hero(
+                                                        tag: 'lending_img_${item.id}',
+                                                        child: Container(
+                                                          height: 120,
+                                                          width: double.infinity,
+                                                          decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(14),
+                                                            border: Border.all(color: AppColors.borderAccent),
+                                                          ),
+                                                          child: ClipRRect(
+                                                            borderRadius: BorderRadius.circular(14),
+                                                            child: item.imageUrl!.startsWith('data:image/')
+                                                                ? Image.memory(
+                                                                    base64Decode(item.imageUrl!.split(',').last),
+                                                                    fit: BoxFit.cover,
+                                                                    width: double.infinity,
+                                                                    height: 120,
+                                                                  )
+                                                                : Image.network(
+                                                                    item.imageUrl!,
+                                                                    fit: BoxFit.cover,
+                                                                    width: double.infinity,
+                                                                    height: 120,
+                                                                    errorBuilder: (context, error, stackTrace) => Container(
+                                                                      color: AppColors.bgCard,
+                                                                      child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                                                    ),
+                                                                  ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ],
                                               ),
                                             ),
@@ -407,7 +477,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                                 .textPrimary)),
                                                   ]),
                                                 ),
-                                                PopupMenuItem(
+                                                const PopupMenuItem(
                                                   value: 'delete',
                                                   child: Row(children: [
                                                     Icon(
@@ -416,7 +486,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                         size: 16,
                                                         color:
                                                             AppColors.expense),
-                                                    const SizedBox(width: 8),
+                                                    SizedBox(width: 8),
                                                     Text('Hapus',
                                                         style: TextStyle(
                                                             color: AppColors

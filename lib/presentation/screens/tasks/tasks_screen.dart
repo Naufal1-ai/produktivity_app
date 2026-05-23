@@ -16,6 +16,13 @@ class TasksScreen extends StatefulWidget {
 class _TasksScreenState extends State<TasksScreen> {
   final _repo = TaskRepository();
   String _taskFilter = 'all';
+  late final Stream<List<TaskModel>> _tasksStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _tasksStream = _repo.watchAll();
+  }
 
   void _openTaskForm([TaskModel? task]) {
     showModalBottomSheet(
@@ -170,7 +177,7 @@ class _TasksScreenState extends State<TasksScreen> {
               // ✅ Body stream
               Expanded(
                 child: StreamBuilder<List<TaskModel>>(
-                  stream: _repo.watchAll(),
+                  stream: _tasksStream,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());

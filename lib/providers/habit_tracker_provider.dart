@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:productivity/data/models/habit_model.dart';
 import 'package:productivity/data/repositories/habit_repository.dart';
 
 class HabitTrackerProvider extends ChangeNotifier {
   final _repository = HabitRepository();
+  StreamSubscription? _subscription;
+  bool _initialized = false;
 
   List<Habit> _habits = [];
   final Map<String, List<HabitLog>> _logsCache = {};
@@ -13,11 +16,21 @@ class HabitTrackerProvider extends ChangeNotifier {
   HabitStats? get stats => _stats;
 
   void initialize() {
-    _repository.watchAll().listen((habits) {
+    if (_initialized) return;
+    _initialized = true;
+
+    _subscription?.cancel();
+    _subscription = _repository.watchAll().listen((habits) {
       _habits = habits;
       notifyListeners();
     });
     _loadStats();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadStats() async {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:productivity/core/theme/app_theme.dart';
@@ -6,6 +8,7 @@ import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:productivity/providers/vehicle_service_provider.dart';
 import 'package:productivity/data/models/vehicle_service_model.dart';
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
 
 class VehicleServiceScreen extends StatefulWidget {
   const VehicleServiceScreen({super.key});
@@ -38,7 +41,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
+      backgroundColor:
+          AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
       body: GridBackground(
         child: SafeArea(
           bottom: false,
@@ -112,8 +116,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                             s.nextServiceDate != null &&
                             s.nextServiceDate!.isBefore(DateTime.now()))
                         .length;
-                    final totalCost = services.fold<double>(
-                        0.0, (sum, s) => sum + s.cost);
+                    final totalCost =
+                        services.fold<double>(0.0, (sum, s) => sum + s.cost);
 
                     return CustomScrollView(
                       slivers: [
@@ -155,7 +159,6 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                             ),
                           ),
                         ),
-
                         SliverPadding(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 120),
                           sliver: SliverList(
@@ -166,7 +169,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
                                   service: service,
                                   currencyFormat: _currencyFormat,
                                   onEdit: () => _showAddEditDialog(service),
-                                  onDelete: () => _confirmDelete(context, provider, service),
+                                  onDelete: () => _confirmDelete(
+                                      context, provider, service),
                                 );
                               },
                               childCount: services.length,
@@ -189,23 +193,24 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
           backgroundColor: AppColors.blueAccent,
           foregroundColor: Colors.white,
           elevation: 0,
-          shape: const CircleBorder(
-              side: BorderSide(color: Colors.transparent)),
+          shape:
+              const CircleBorder(side: BorderSide(color: Colors.transparent)),
           child: const Icon(Icons.add),
         ),
       ),
     );
   }
 
-  void _confirmDelete(
-      BuildContext context, VehicleServiceProvider provider, VehicleServiceModel service) {
+  void _confirmDelete(BuildContext context, VehicleServiceProvider provider,
+      VehicleServiceModel service) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.bgCard,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('Hapus Data',
-            style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+            style: TextStyle(
+                color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
         content: Text(
           'Hapus riwayat "${service.title}"?',
           style: TextStyle(color: AppColors.textSecondary),
@@ -220,7 +225,8 @@ class _VehicleServiceScreenState extends State<VehicleServiceScreen> {
               provider.deleteService(service.id);
               Navigator.pop(ctx);
             },
-            child: const Text('Hapus', style: TextStyle(color: AppColors.expense)),
+            child:
+                const Text('Hapus', style: TextStyle(color: AppColors.expense)),
           ),
         ],
       ),
@@ -330,6 +336,7 @@ class _ServiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDue = service.nextServiceDate != null &&
         service.nextServiceDate!.isBefore(DateTime.now());
+    final cardImageUrl = service.imageUrl;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -367,7 +374,9 @@ class _ServiceCard extends StatelessWidget {
                           child: Icon(
                             Icons.build_circle_outlined,
                             size: 18,
-                            color: isDue ? AppColors.expense : AppColors.blueAccent,
+                            color: isDue
+                                ? AppColors.expense
+                                : AppColors.blueAccent,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -421,7 +430,7 @@ class _ServiceCard extends StatelessWidget {
                           icon: Icons.speed_rounded,
                           label: '${service.odometer} km',
                         ),
-                        if (service.notes.isNotEmpty) ...{
+                        if (service.notes.isNotEmpty) ...[
                           const SizedBox(width: 8),
                           Expanded(
                             child: _InfoChip(
@@ -430,12 +439,14 @@ class _ServiceCard extends StatelessWidget {
                               expand: true,
                             ),
                           ),
-                        },
+                        ],
                       ],
                     ),
 
+
+
                     // ── Next service badge ─────────────────────────────
-                    if (service.nextServiceDate != null) ...{
+                    if (service.nextServiceDate != null) ...[
                       const SizedBox(height: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -479,7 +490,78 @@ class _ServiceCard extends StatelessWidget {
                           ],
                         ),
                       ),
-                    },
+                    ],
+
+                    // ── Image Odometer / Nota ───────────────────────────
+                    if (cardImageUrl != null && cardImageUrl.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => Dialog(
+                              backgroundColor: Colors.transparent,
+                              insetPadding: const EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topRight,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                      onPressed: () => Navigator.pop(ctx),
+                                    ),
+                                  ),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: cardImageUrl.startsWith('data:image/')
+                                        ? Image.memory(
+                                            base64Decode(cardImageUrl.split(',').last),
+                                            fit: BoxFit.contain,
+                                          )
+                                        : Image.network(
+                                            cardImageUrl,
+                                            fit: BoxFit.contain,
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Hero(
+                          tag: 'service_img_${service.id}',
+                          child: Container(
+                            height: 120,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.borderAccent),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(14),
+                              child: cardImageUrl.startsWith('data:image/')
+                                  ? Image.memory(
+                                      base64Decode(cardImageUrl.split(',').last),
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 120,
+                                    )
+                                  : Image.network(
+                                      cardImageUrl,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: 120,
+                                      errorBuilder: (context, error, stackTrace) => Container(
+                                        color: AppColors.bgCard,
+                                        child: Icon(Icons.broken_image_outlined, color: AppColors.textMuted),
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
 
                     // ── Actions ────────────────────────────────────────
                     const SizedBox(height: 12),
@@ -501,7 +583,7 @@ class _ServiceCard extends StatelessWidget {
                         const SizedBox(width: 4),
                         TextButton.icon(
                           onPressed: onDelete,
-                          icon: Icon(Icons.delete_outline_rounded,
+                          icon: const Icon(Icons.delete_outline_rounded,
                               size: 14, color: AppColors.expense),
                           label: const Text('Hapus',
                               style: TextStyle(
@@ -584,19 +666,41 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
   DateTime? _nextServiceDate;
   bool _isLoading = false;
 
+  File? _imageFile;
+  bool _deleteImage = false;
+  final ImagePicker _picker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     _titleController =
         TextEditingController(text: widget.service?.title ?? 'Ganti Oli');
-    _notesController =
-        TextEditingController(text: widget.service?.notes ?? '');
+    _notesController = TextEditingController(text: widget.service?.notes ?? '');
     _costController = TextEditingController(
         text: widget.service?.cost.toInt().toString() ?? '');
     _odometerController =
         TextEditingController(text: widget.service?.odometer.toString() ?? '');
     _date = widget.service?.date ?? DateTime.now();
     _nextServiceDate = widget.service?.nextServiceDate;
+  }
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 30,
+        maxWidth: 500,
+        maxHeight: 500,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+          _deleteImage = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+    }
   }
 
   @override
@@ -617,6 +721,7 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
     );
+    if (!mounted) return;
     if (picked != null) {
       setState(() {
         if (isNext) {
@@ -627,6 +732,8 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
       });
     }
   }
+
+
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
@@ -642,19 +749,19 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
         odometer: int.tryParse(_odometerController.text) ?? 0,
         nextServiceDate: _nextServiceDate,
         createdAt: widget.service?.createdAt ?? DateTime.now(),
+        imageUrl: widget.service?.imageUrl,
       );
       if (widget.service == null) {
-        await provider.addService(service);
+        await provider.addService(service, imageFile: _imageFile);
       } else {
-        await provider.updateService(service);
+        await provider.updateService(service, imageFile: _imageFile, deleteImage: _deleteImage);
       }
       if (mounted) Navigator.pop(context);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -774,16 +881,18 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                       isAccent: _nextServiceDate != null,
                     ),
                   ),
-                  if (_nextServiceDate != null) ...{
+                  if (_nextServiceDate != null) ...[
                     const SizedBox(width: 8),
                     IconButton(
                       icon: Icon(Icons.clear, color: AppColors.textMuted),
                       onPressed: () => setState(() => _nextServiceDate = null),
                     ),
-                  },
+                  ],
                 ],
               ),
               const SizedBox(height: 14),
+
+
 
               TextFormField(
                 controller: _notesController,
@@ -794,6 +903,132 @@ class _AddEditServiceSheetState extends State<_AddEditServiceSheet> {
                 ),
                 maxLines: 2,
               ),
+              // ── Image Picker UI ─────────────────────────────────────────────
+              const SizedBox(height: 16),
+              Text(
+                'Foto Odometer / Nota (Opsional)',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_imageFile != null || (widget.service?.imageUrl != null && widget.service!.imageUrl!.isNotEmpty && !_deleteImage))
+                Container(
+                  height: 140,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.borderAccent),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: _imageFile != null
+                              ? Image.file(
+                                  _imageFile!,
+                                  fit: BoxFit.cover,
+                                )
+                              : (widget.service?.imageUrl?.startsWith('data:image/') ?? false)
+                                  ? Image.memory(
+                                      base64Decode(widget.service!.imageUrl!.split(',').last),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.network(
+                                      widget.service?.imageUrl ?? '',
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                                    ),
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _imageFile = null;
+                              if (widget.service?.imageUrl != null && widget.service!.imageUrl!.isNotEmpty) {
+                                _deleteImage = true;
+                              }
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _pickImage(ImageSource.camera),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgCard,
+                            border: Border.all(color: AppColors.borderAccent),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.camera_alt_outlined, color: AppColors.blueAccent, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Kamera',
+                                style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _pickImage(ImageSource.gallery),
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgCard,
+                            border: Border.all(color: AppColors.borderAccent),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.photo_library_outlined, color: AppColors.blueAccent, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Galeri',
+                                style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 24),
 
               SizedBox(
@@ -858,16 +1093,13 @@ class _DatePickerTile extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 18,
-                color:
-                    isAccent ? AppColors.blueAccent : AppColors.textMuted),
+                color: isAccent ? AppColors.blueAccent : AppColors.textMuted),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
-                  color: isAccent
-                      ? AppColors.blueAccent
-                      : AppColors.textMuted,
+                  color: isAccent ? AppColors.blueAccent : AppColors.textMuted,
                   fontSize: 13,
                 ),
                 overflow: TextOverflow.ellipsis,

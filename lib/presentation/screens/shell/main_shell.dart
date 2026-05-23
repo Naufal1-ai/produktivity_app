@@ -286,7 +286,7 @@ class _MainShellState extends State<MainShell> {
                           Column(
                             children: [
                               Text(
-                                'v1.0.0',
+                                'v2.1.0',
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 11,

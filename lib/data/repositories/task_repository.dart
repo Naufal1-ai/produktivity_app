@@ -24,14 +24,22 @@ class TaskRepository {
         .map((snap) => snap.docs.map(TaskModel.fromDoc).toList());
   }
 
-  Future<void> add(TaskModel task) async {
-    await _col?.add(task.toMap());
+  Future<String> add(TaskModel task) async {
+    final col = _col;
+    if (col == null) return '';
+    final docRef = col.doc();
+    await docRef.set(task.toMap());
+    return docRef.id;
   }
 
   Future<void> update(TaskModel task) async {
     final data = task.toMap();
     data.remove('createdAt');
     await _col?.doc(task.id).update(data);
+  }
+
+  Future<void> updateFields(String id, Map<String, dynamic> data) async {
+    await _col?.doc(id).update(data);
   }
 
   Future<void> delete(String id) async {

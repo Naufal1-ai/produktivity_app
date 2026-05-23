@@ -303,7 +303,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                                 BorderRadius
                                                                     .circular(6),
                                                           ),
-                                                          child: Text(
+                                                          child: const Text(
                                                             'Dikembalikan',
                                                             style: TextStyle(
                                                                 color: AppColors
@@ -330,7 +330,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                                 BorderRadius
                                                                     .circular(6),
                                                           ),
-                                                          child: Text(
+                                                          child: const Text(
                                                             'Terlambat',
                                                             style: TextStyle(
                                                                 color: AppColors
@@ -447,7 +447,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                     ],
                                                   ),
                                                 ),
-                                                PopupMenuItem(
+                                                const PopupMenuItem(
                                                   value: 'delete',
                                                   child: Row(
                                                     children: [
@@ -457,7 +457,7 @@ class _LendingScreenState extends State<LendingScreen> {
                                                           size: 16,
                                                           color:
                                                               AppColors.expense),
-                                                      const SizedBox(width: 8),
+                                                      SizedBox(width: 8),
                                                       Text('Hapus',
                                                           style: TextStyle(
                                                               color: AppColors

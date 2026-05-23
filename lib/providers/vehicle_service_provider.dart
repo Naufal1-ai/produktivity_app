@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:productivity/core/utils/image_helper.dart';
 import 'package:productivity/data/models/vehicle_service_model.dart';
 import 'package:productivity/data/repositories/vehicle_service_repository.dart';
 
@@ -31,12 +33,24 @@ class VehicleServiceProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> addService(VehicleServiceModel service) async {
-    await _repository.add(service);
+  Future<void> addService(VehicleServiceModel service, {File? imageFile}) async {
+    VehicleServiceModel serviceToSave = service;
+    if (imageFile != null) {
+      final base64String = await ImageHelper.fileToBase64(imageFile);
+      serviceToSave = service.copyWith(imageUrl: base64String);
+    }
+    await _repository.add(serviceToSave);
   }
 
-  Future<void> updateService(VehicleServiceModel service) async {
-    await _repository.update(service);
+  Future<void> updateService(VehicleServiceModel service, {File? imageFile, bool deleteImage = false}) async {
+    VehicleServiceModel serviceToSave = service;
+    if (deleteImage) {
+      serviceToSave = service.copyWith(imageUrl: ''); // clear image
+    } else if (imageFile != null) {
+      final base64String = await ImageHelper.fileToBase64(imageFile);
+      serviceToSave = service.copyWith(imageUrl: base64String);
+    }
+    await _repository.update(serviceToSave);
   }
 
   Future<void> deleteService(String id) async {

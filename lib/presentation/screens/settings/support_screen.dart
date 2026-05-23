@@ -156,7 +156,7 @@ class SupportScreen extends StatelessWidget {
                     const SizedBox(height: 20),
                     _InfoItem(
                       title: l10n.version,
-                      value: '1.0.0',
+                      value: '2.1.0',
                     ),
                     const SizedBox(height: 12),
                     _InfoItem(

@@ -10,6 +10,7 @@ class VehicleServiceModel {
   final DateTime? nextServiceDate;
   final int? nextServiceOdometer;
   final DateTime createdAt;
+  final String? imageUrl;
 
   VehicleServiceModel({
     required this.id,
@@ -21,6 +22,7 @@ class VehicleServiceModel {
     this.nextServiceDate,
     this.nextServiceOdometer,
     required this.createdAt,
+    this.imageUrl,
   });
 
   factory VehicleServiceModel.fromDoc(DocumentSnapshot doc) {
@@ -39,6 +41,7 @@ class VehicleServiceModel {
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
+      imageUrl: data['imageUrl'] as String?,
     );
   }
 
@@ -52,6 +55,7 @@ class VehicleServiceModel {
             nextServiceDate != null ? Timestamp.fromDate(nextServiceDate!) : null,
         'nextServiceOdometer': nextServiceOdometer,
         'createdAt': FieldValue.serverTimestamp(),
+        'imageUrl': imageUrl,
       };
 
   VehicleServiceModel copyWith({
@@ -62,6 +66,7 @@ class VehicleServiceModel {
     int? odometer,
     DateTime? nextServiceDate,
     int? nextServiceOdometer,
+    String? imageUrl,
   }) =>
       VehicleServiceModel(
         id: id,
@@ -73,5 +78,6 @@ class VehicleServiceModel {
         nextServiceDate: nextServiceDate ?? this.nextServiceDate,
         nextServiceOdometer: nextServiceOdometer ?? this.nextServiceOdometer,
         createdAt: createdAt,
+        imageUrl: imageUrl ?? this.imageUrl,
       );
 }

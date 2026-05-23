@@ -21,6 +21,13 @@ class _SearchScreenState extends State<SearchScreen> {
   String _query = '';
   String? _filterType; // null = semua, 'pemasukan', 'pengeluaran'
   String? _filterCategory;
+  late final Stream<List<TransactionModel>> _transactionStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _transactionStream = _repo.watchAll();
+  }
 
   @override
   void dispose() {
@@ -164,7 +171,7 @@ class _SearchScreenState extends State<SearchScreen> {
         // ── Results ───────────────────────────────────────────────────────────
         Expanded(
           child: StreamBuilder<List<TransactionModel>>(
-            stream: _repo.watchAll(),
+            stream: _transactionStream,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(

@@ -193,7 +193,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       trailing: Switch(
                         value: widget.isDarkMode,
                         onChanged: (_) => widget.onToggleTheme(),
-                        activeColor: AppColors.blueAccent,
+                        activeThumbColor: AppColors.blueAccent,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -257,7 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _settingsService.dailyReminder = value;
                           });
                         },
-                        activeColor: AppColors.blueAccent,
+                        activeThumbColor: AppColors.blueAccent,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -274,7 +274,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             _settingsService.weeklyReminder = value;
                           });
                         },
-                        activeColor: AppColors.blueAccent,
+                        activeThumbColor: AppColors.blueAccent,
                       ),
                     ),
                   ],
@@ -476,7 +476,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 16),
                     _SettingsItem(
                       icon: Icons.info_outline,
-                      title: 'Versi 1.0.0',
+                      title: 'Versi 2.1.0',
                       subtitle: 'Dibuat oleh Naufal Khalil Aldeza',
                       onTap: () {},
                       showArrow: false,

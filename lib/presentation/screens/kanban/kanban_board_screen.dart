@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:productivity/core/theme/app_theme.dart';
+import 'package:productivity/core/utils/currency_utils.dart';
 import 'package:productivity/data/models/kanban_board_model.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:productivity/presentation/widgets/grid_background.dart';
+import 'package:productivity/presentation/widgets/kanban_card_form_sheet.dart';
 
 class KanbanBoardScreen extends StatefulWidget {
   const KanbanBoardScreen({super.key});
@@ -14,9 +16,6 @@ class KanbanBoardScreen extends StatefulWidget {
 }
 
 class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  String _selectedColumn = 'Todo';
   String? _draggingOverColumn;
 
   @override
@@ -29,111 +28,19 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
     super.dispose();
   }
 
-  void _openAddCardDialog() {
-    _titleController.clear();
-    _descriptionController.clear();
-    setState(() => _selectedColumn = 'Todo');
-
-    showDialog(
+  void _openCardFormSheet([KanbanCard? card, String preselectedColumn = 'Todo']) {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: AppColors.bgCard,
-          title: const Text('Tambah Kartu Baru'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _titleController,
-                  decoration: InputDecoration(
-                    hintText: 'Judul kartu',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    filled: true,
-                    fillColor: AppColors.isDark
-                        ? const Color(0xFF1C1C1C)
-                        : Colors.grey[100],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _descriptionController,
-                  maxLines: 3,
-                  decoration: InputDecoration(
-                    hintText: 'Deskripsi',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    filled: true,
-                    fillColor: AppColors.isDark
-                        ? const Color(0xFF1C1C1C)
-                        : Colors.grey[100],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: _selectedColumn,
-                  items: kKanbanColumns
-                      .map((col) =>
-                          DropdownMenuItem(value: col, child: Text(col)))
-                      .toList(),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setDialogState(() => _selectedColumn = val);
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Kolom',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                    filled: true,
-                    fillColor: AppColors.isDark
-                        ? const Color(0xFF1C1C1C)
-                        : Colors.grey[100],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Batal'),
-            ),
-            ElevatedButton(
-              onPressed: _submitCard,
-              child: const Text('Tambah'),
-            ),
-          ],
-        ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => KanbanCardFormSheet(
+        existing: card,
+        preselectedColumn: preselectedColumn,
       ),
     );
-  }
-
-  void _submitCard() {
-    if (_titleController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Judul tidak boleh kosong')),
-      );
-      return;
-    }
-
-    final card = KanbanCard(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleController.text,
-      description: _descriptionController.text,
-      column: _selectedColumn,
-      order: DateTime.now().millisecondsSinceEpoch,
-      createdAt: DateTime.now(),
-    );
-
-    context.read<KanbanBoardProvider>().addCard(card);
-    Navigator.pop(context);
   }
 
   @override
@@ -175,7 +82,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     ),
                     // ✅ Tombol tambah di kanan header
                     GestureDetector(
-                      onTap: _openAddCardDialog,
+                      onTap: () => _openCardFormSheet(null, 'Todo'),
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
@@ -281,7 +188,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 100),
         child: FloatingActionButton(
-          onPressed: _openAddCardDialog,
+          onPressed: () => _openCardFormSheet(null, 'Todo'),
           backgroundColor: AppColors.blueAccent,
           child:
               const Icon(Icons.add, color: Color.fromARGB(255, 255, 255, 255)),
@@ -458,7 +365,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
         opacity: 0.3,
         child: _buildCardContent(card),
       ),
-      child: _buildCardContent(card),
+      child: GestureDetector(
+        onTap: () => _openCardFormSheet(card, card.column),
+        child: _buildCardContent(card),
+      ),
     );
   }
 
@@ -508,6 +418,80 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
               style: TextStyle(fontSize: 12, color: AppColors.textMuted),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          if (card.dueDate != null || card.category != null || card.priority != null) ...[
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                if (card.dueDate != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.blueAccent.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.calendar_today, size: 10, color: AppColors.blueAccent),
+                        const SizedBox(width: 4),
+                        Text(
+                          DateUtils2.formatDisplay(card.dueDate!),
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: AppColors.blueAccent,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (card.category != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.isDark
+                          ? Colors.white.withValues(alpha: 0.05)
+                          : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      card.category!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                if (card.priority != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: card.priority == 'High'
+                          ? AppColors.expense.withValues(alpha: 0.1)
+                          : card.priority == 'Low'
+                              ? AppColors.textMuted.withValues(alpha: 0.1)
+                              : AppColors.income.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      card.priority!,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: card.priority == 'High'
+                            ? AppColors.expense
+                            : card.priority == 'Low'
+                                ? AppColors.textMuted
+                                : AppColors.income,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ],
         ],
