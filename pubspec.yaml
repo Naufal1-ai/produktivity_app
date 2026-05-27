@@ -1,7 +1,7 @@
 name: productivity
 description: A new Flutter project.
 publish_to: 'none'
-version: 2.1.0+1
+version: 2.2.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -28,6 +28,8 @@ dependencies:
   flutter_dotenv: ^6.0.1
   url_launcher: ^6.3.2
   image_picker: ^1.1.2
+  mix: ^2.0.3
+  msix: ^3.16.13
 
 dev_dependencies:
   flutter_test:

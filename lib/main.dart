@@ -31,8 +31,12 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Inisialisasi service notifikasi
-  await NotificationService().init();
+  // Inisialisasi service notifikasi secara aman (terutama untuk Windows desktop)
+  try {
+    await NotificationService().init();
+  } catch (e) {
+    debugPrint("Gagal menginisialisasi layanan notifikasi: $e");
+  }
 
   // Initialize settings service
   final settingsService = SettingsService();

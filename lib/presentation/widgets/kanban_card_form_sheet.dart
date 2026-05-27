@@ -36,13 +36,20 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedColumn = widget.preselectedColumn;
+    final activeBoard = context.read<KanbanBoardProvider>().activeBoard;
+    final boardCols = activeBoard?.columns ?? kKanbanColumns;
+    
+    _selectedColumn = boardCols.contains(widget.preselectedColumn)
+        ? widget.preselectedColumn
+        : (boardCols.isNotEmpty ? boardCols.first : 'Todo');
 
     if (_isEditing) {
       final card = widget.existing!;
       _titleController.text = card.title;
       _descriptionController.text = card.description;
-      _selectedColumn = card.column;
+      _selectedColumn = boardCols.contains(card.column)
+          ? card.column
+          : (boardCols.isNotEmpty ? boardCols.first : 'Todo');
       _connectToTask = card.taskId != null;
       if (card.dueDate != null) {
         _dueDate = card.dueDate!;
@@ -97,6 +104,9 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
 
     setState(() => _isSaving = true);
     try {
+      final provider = context.read<KanbanBoardProvider>();
+      final boardId = provider.activeBoard?.id ?? 'default';
+
       final card = KanbanCard(
         id: widget.existing?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text.trim(),
@@ -108,9 +118,11 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
         dueDate: _connectToTask ? _dueDate : null,
         category: _connectToTask ? _category : null,
         priority: _connectToTask ? _priority : null,
+        boardId: boardId,
+        checklists: widget.existing?.checklists ?? const [],
+        labels: widget.existing?.labels ?? const [],
       );
 
-      final provider = context.read<KanbanBoardProvider>();
       if (_isEditing) {
         await provider.updateCard(card, shouldLinkTask: _connectToTask);
       } else {
@@ -134,6 +146,12 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final activeBoard = context.watch<KanbanBoardProvider>().activeBoard;
+    final boardCols = activeBoard?.columns ?? kKanbanColumns;
+    final displayColumn = boardCols.contains(_selectedColumn)
+        ? _selectedColumn
+        : (boardCols.isNotEmpty ? boardCols.first : 'Todo');
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.bgCardAlt,
@@ -201,10 +219,10 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
 
           // Column Selector Dropdown
           DropdownButtonFormField<String>(
-            initialValue: _selectedColumn,
+            value: displayColumn,
             decoration: const InputDecoration(labelText: 'Kolom Papan'),
-            items: kKanbanColumns
-                .map((col) => DropdownMenuItem(value: col, child: Text(col)))
+            items: boardCols
+                .map((col) => DropdownMenuItem<String>(value: col, child: Text(col)))
                 .toList(),
             onChanged: (val) {
               if (val != null) setState(() => _selectedColumn = val);

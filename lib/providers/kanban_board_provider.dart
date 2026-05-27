@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:productivity/data/models/board_model.dart';
 import 'package:productivity/data/models/kanban_board_model.dart';
 import 'package:productivity/data/models/task_model.dart';
 import 'package:productivity/data/repositories/kanban_board_repository.dart';
@@ -9,20 +10,19 @@ class KanbanBoardProvider extends ChangeNotifier {
   final _repository = KanbanBoardRepository();
   final _taskRepository = TaskRepository();
 
-  final List<StreamSubscription> _subscriptions = [];
   bool _initialized = false;
+  List<BoardModel> _boards = [];
+  BoardModel? _activeBoard;
 
-  final Map<String, List<KanbanCard>> _cardsByColumn = {
-    'Todo': [],
-    'In Progress': [],
-    'Review': [],
-    'Done': [],
-  };
+  StreamSubscription? _boardsSubscription;
+  final List<StreamSubscription> _cardsSubscriptions = [];
 
-  List<KanbanCard> get todoCards => _cardsByColumn['Todo'] ?? [];
-  List<KanbanCard> get inProgressCards => _cardsByColumn['In Progress'] ?? [];
-  List<KanbanCard> get reviewCards => _cardsByColumn['Review'] ?? [];
-  List<KanbanCard> get doneCards => _cardsByColumn['Done'] ?? [];
+  final Map<String, List<KanbanCard>> _cardsByColumn = {};
+
+  List<BoardModel> get boards => _boards;
+  BoardModel? get activeBoard => _activeBoard;
+
+  List<KanbanCard> getCardsForColumn(String column) => _cardsByColumn[column] ?? [];
 
   List<KanbanCard> get allCards {
     final all = <KanbanCard>[];
@@ -30,37 +30,136 @@ class KanbanBoardProvider extends ChangeNotifier {
     return all;
   }
 
-  // Initialize listeners for each column
+  // Initialize listeners
   void initialize() {
     if (_initialized) return;
     _initialized = true;
 
-    _clearSubscriptions();
+    _boardsSubscription?.cancel();
+    _boardsSubscription = _repository.watchBoards().listen((boardsList) async {
+      _boards = boardsList;
 
-    for (final column in kKanbanColumns) {
-      final sub = _repository.watchAllByColumn(column).listen((cards) {
-        _cardsByColumn[column] = cards;
-        notifyListeners();
-      });
-      _subscriptions.add(sub);
-    }
+      if (boardsList.isEmpty) {
+        // Create default board if none exists
+        final defaultBoard = BoardModel(
+          id: 'default',
+          name: 'Papan Utama',
+          description: 'Papan aktivitas utama Anda',
+          colorIndex: 0,
+          columns: ['Todo', 'In Progress', 'Review', 'Done'],
+          createdAt: DateTime.now(),
+        );
+        await _repository.addBoard(defaultBoard);
+        return;
+      }
+
+      // Set active board
+      if (_activeBoard == null || !boardsList.any((b) => b.id == _activeBoard!.id)) {
+        _activeBoard = boardsList.first;
+      } else {
+        _activeBoard = boardsList.firstWhere((b) => b.id == _activeBoard!.id);
+      }
+
+      _listenToActiveBoardCards();
+      notifyListeners();
+    });
   }
 
-  void _clearSubscriptions() {
-    for (final sub in _subscriptions) {
+  void _listenToActiveBoardCards() {
+    for (final sub in _cardsSubscriptions) {
       sub.cancel();
     }
-    _subscriptions.clear();
+    _cardsSubscriptions.clear();
+
+    final board = _activeBoard;
+    if (board == null) return;
+
+    final fallbackBoardId = _boards.isNotEmpty ? _boards.first.id : 'default';
+
+    final sub = _repository.watchAll(board.id, fallbackBoardId: fallbackBoardId).listen((allCardsList) {
+      _cardsByColumn.clear();
+
+      // Initialize columns list for active board
+      for (final col in board.columns) {
+        _cardsByColumn[col] = [];
+      }
+
+      // Group cards
+      for (final card in allCardsList) {
+        final colName = board.columns.contains(card.column) ? card.column : board.columns.first;
+        _cardsByColumn[colName] ??= [];
+        _cardsByColumn[colName]!.add(card);
+      }
+
+      notifyListeners();
+    });
+    _cardsSubscriptions.add(sub);
   }
 
-  @override
-  void dispose() {
-    _clearSubscriptions();
-    super.dispose();
+  // Select board manually
+  void selectBoard(String boardId) {
+    final target = _boards.where((b) => b.id == boardId).firstOrNull;
+    if (target != null) {
+      _activeBoard = target;
+      _listenToActiveBoardCards();
+      notifyListeners();
+    }
   }
+
+  // === BOARD CRUD ===
+
+  Future<void> addBoard(String name, String description, int colorIndex, List<String> columns) async {
+    try {
+      final board = BoardModel(
+        id: '',
+        name: name,
+        description: description,
+        colorIndex: colorIndex,
+        columns: columns.isEmpty ? ['Todo', 'In Progress', 'Done'] : columns,
+        createdAt: DateTime.now(),
+      );
+      final id = await _repository.addBoard(board);
+      // Automatically switch to the newly created board
+      if (id.isNotEmpty) {
+        _activeBoard = board.copyWith().copyWith(); // temporary fallback
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateBoard(BoardModel board) async {
+    try {
+      await _repository.updateBoard(board);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteBoard(String boardId) async {
+    try {
+      // 1. Delete all cards under this board
+      final cardsToDelete = allCards;
+      for (final card in cardsToDelete) {
+        await deleteCard(card.id);
+      }
+      
+      // 2. Delete the board itself
+      await _repository.deleteBoard(boardId);
+      
+      // Active board will be updated automatically by the stream listener
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // === CARD CRUD ===
 
   Future<void> addCard(KanbanCard card, {bool createLinkedTask = false}) async {
     try {
+      final board = _activeBoard;
+      if (board == null) return;
+
       String? taskId;
       if (createLinkedTask && card.dueDate != null) {
         final task = TaskModel(
@@ -70,13 +169,16 @@ class KanbanBoardProvider extends ChangeNotifier {
           category: card.category ?? 'Pekerjaan',
           priority: card.priority ?? 'Medium',
           dueDate: card.dueDate!,
-          completed: card.column == 'Done',
+          completed: card.column == board.columns.last,
           createdAt: DateTime.now(),
         );
         taskId = await _taskRepository.add(task);
       }
 
-      final cardToSave = card.copyWith(taskId: taskId);
+      final cardToSave = card.copyWith(
+        boardId: board.id,
+        taskId: taskId,
+      );
       await _repository.add(cardToSave);
     } catch (e) {
       rethrow;
@@ -85,9 +187,13 @@ class KanbanBoardProvider extends ChangeNotifier {
 
   Future<void> updateCard(KanbanCard card, {bool shouldLinkTask = false}) async {
     try {
+      final board = _activeBoard;
+      if (board == null) return;
+
       String? updatedTaskId = card.taskId;
 
       if (shouldLinkTask && card.dueDate != null) {
+        final isCompleted = card.column == board.columns.last;
         if (updatedTaskId == null || updatedTaskId.isEmpty) {
           final task = TaskModel(
             id: '',
@@ -96,7 +202,7 @@ class KanbanBoardProvider extends ChangeNotifier {
             category: card.category ?? 'Pekerjaan',
             priority: card.priority ?? 'Medium',
             dueDate: card.dueDate!,
-            completed: card.column == 'Done',
+            completed: isCompleted,
             createdAt: DateTime.now(),
           );
           updatedTaskId = await _taskRepository.add(task);
@@ -108,7 +214,7 @@ class KanbanBoardProvider extends ChangeNotifier {
             category: card.category ?? 'Pekerjaan',
             priority: card.priority ?? 'Medium',
             dueDate: card.dueDate!,
-            completed: card.column == 'Done',
+            completed: isCompleted,
             createdAt: DateTime.now(),
           );
           await _taskRepository.update(task);
@@ -129,9 +235,12 @@ class KanbanBoardProvider extends ChangeNotifier {
     try {
       await _repository.moveCard(cardId, newColumn, newOrder);
       
+      final board = _activeBoard;
+      if (board == null) return;
+
       final card = allCards.where((c) => c.id == cardId).firstOrNull;
       if (card != null && card.taskId != null && card.taskId!.isNotEmpty) {
-        final isCompleted = newColumn == 'Done';
+        final isCompleted = newColumn == board.columns.last;
         await _taskRepository.updateFields(card.taskId!, {
           'completed': isCompleted,
         });
@@ -154,11 +263,29 @@ class KanbanBoardProvider extends ChangeNotifier {
     }
   }
 
+  // === ANALYTICS & PROGRESS ===
+
   int getTotalCards() => allCards.length;
-  int getCompletedCards() => doneCards.length;
+  
+  int getCompletedCards() {
+    final board = _activeBoard;
+    if (board == null || board.columns.isEmpty) return 0;
+    final lastColumn = board.columns.last;
+    return _cardsByColumn[lastColumn]?.length ?? 0;
+  }
 
   double getProgressPercentage() {
-    if (allCards.isEmpty) return 0;
-    return (doneCards.length / allCards.length) * 100;
+    final total = getTotalCards();
+    if (total == 0) return 0;
+    return (getCompletedCards() / total) * 100;
+  }
+
+  @override
+  void dispose() {
+    _boardsSubscription?.cancel();
+    for (final sub in _cardsSubscriptions) {
+      sub.cancel();
+    }
+    super.dispose();
   }
 }
