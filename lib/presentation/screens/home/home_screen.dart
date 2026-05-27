@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/core/utils/currency_utils.dart';
 import 'package:productivity/data/models/transaction_model.dart';
@@ -13,7 +14,6 @@ import 'package:productivity/data/repositories/lending_repository.dart';
 import 'package:productivity/presentation/screens/lending/lending_screen.dart';
 import 'package:productivity/presentation/widgets/common_widgets.dart';
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
-import 'package:productivity/presentation/widgets/grid_background.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:productivity/presentation/widgets/dashboard_summary_cards.dart';
 import 'package:productivity/presentation/widgets/dashboard_line_chart.dart';
@@ -48,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedMonth = DateTime.now();
   late Stream<List<TransactionModel>> _transactionStream;
   late final Stream<List<LendingModel>> _lendingStream;
+  List<String> _dashboardBlocks = ['summary', 'kanban', 'pomodoro', 'habit', 'lending', 'charts'];
 
   String get _greeting {
     final h = DateTime.now().hour;
@@ -62,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadCardOrder();
     _transactionStream = _repo.watchByMonth(_selectedMonth);
     _lendingStream = _lendingRepo.watchAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -70,6 +72,54 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<HabitTrackerProvider>().initialize();
     });
   }
+
+  Future<void> _loadCardOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedBlocks = prefs.getStringList('dashboard_block_order');
+    if (savedBlocks != null && savedBlocks.length == 6) {
+      final validKeys = {'summary', 'kanban', 'pomodoro', 'habit', 'lending', 'charts'};
+      if (savedBlocks.toSet().difference(validKeys).isEmpty) {
+        setState(() {
+          _dashboardBlocks = savedBlocks;
+        });
+      }
+    }
+  }
+
+  Future<void> _saveCardOrder(List<String> newOrder) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('dashboard_block_order', newOrder);
+    setState(() {
+      _dashboardBlocks = newOrder;
+    });
+  }
+
+  void _swapCards(String draggedKey, String targetKey) {
+    final draggedIndex = _dashboardBlocks.indexOf(draggedKey);
+    final targetIndex = _dashboardBlocks.indexOf(targetKey);
+    if (draggedIndex != -1 && targetIndex != -1) {
+      final temp = List<String>.from(_dashboardBlocks);
+      temp[draggedIndex] = targetKey;
+      temp[targetIndex] = draggedKey;
+      _saveCardOrder(temp);
+      
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              const Text('Posisi kartu berhasil ditukar!'),
+            ],
+          ),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
 
   void _openForm([TransactionModel? tx]) {
     showModalBottomSheet(
@@ -81,6 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void openAddForm() => _openForm();
+
+
 
   Future<void> _delete(String id) async {
     await _repo.delete(id);
@@ -100,10 +152,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
-      body: GridBackground(
-        child: SafeArea(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
           bottom: false,
           child: StreamBuilder<List<TransactionModel>>(
             stream: _transactionStream,
@@ -151,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '$_greeting, $_userEmail.',
+                                    '$_greeting, $_userEmail. • Tahan & geser kartu untuk mengubah posisi',
                                     style: TextStyle(
                                         color: AppColors.textMuted,
                                         fontSize: 13),
@@ -235,103 +285,194 @@ class _HomeScreenState extends State<HomeScreen> {
                               SliverToBoxAdapter(
                                 child: Padding(
                                   padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      DashboardSummaryCards(
-                                        balance: balance,
-                                        totalIncome: totalIncome,
-                                        totalExpense: totalExpense,
-                                        isDesktop: isDesktop,
-                                      ),
-                                      const SizedBox(height: 24),
-
-                                      // ── Kanban, Pomodoro, Habit ──
-                                      if (isDesktop) ...[
-                                        IntrinsicHeight(
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Expanded(
-                                                  child: _buildKanbanOverview(context)),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                  child:
-                                                      _buildPomodoroOverview(context)),
-                                            ],
-                                          ),
+                                  child: Builder(
+                                    builder: (context) {
+                                      final Map<String, Widget> blockWidgets = {
+                                        'summary': DashboardSummaryCards(
+                                          balance: balance,
+                                          totalIncome: totalIncome,
+                                          totalExpense: totalExpense,
+                                          isDesktop: isDesktop,
                                         ),
-                                        const SizedBox(height: 16),
-                                        IntrinsicHeight(
-                                          child: Row(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              Expanded(
-                                                  child: _buildHabitOverview(context)),
-                                              const SizedBox(width: 16),
-                                              Expanded(
-                                                  child:
-                                                      _buildLendingOverview(context)),
-                                            ],
-                                          ),
-                                        ),
-                                      ] else
-                                        Column(
-                                          children: [
-                                            _buildKanbanOverview(context),
-                                            const SizedBox(height: 16),
-                                            _buildPomodoroOverview(context),
-                                            const SizedBox(height: 16),
-                                            _buildHabitOverview(context),
-                                            const SizedBox(height: 16),
-                                            _buildLendingOverview(context),
-                                          ],
-                                        ),
-
-                                      const SizedBox(height: 24),
-
-                                      // ── Charts ──
-                                      if (isDesktop)
-                                        SizedBox(
-                                          height: 320,
-                                          child: Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 2,
-                                                child: DashboardLineChart(
-                                                    transactions: txList,
-                                                    month: _selectedMonth),
+                                        'kanban': _buildKanbanOverview(context),
+                                        'pomodoro': _buildPomodoroOverview(context),
+                                        'habit': _buildHabitOverview(context),
+                                        'lending': _buildLendingOverview(context),
+                                        'charts': isDesktop
+                                            ? SizedBox(
+                                                height: 320,
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 2,
+                                                      child: DashboardLineChart(
+                                                          transactions: txList,
+                                                          month: _selectedMonth),
+                                                    ),
+                                                    const SizedBox(width: 24),
+                                                    Expanded(
+                                                      flex: 1,
+                                                      child: DashboardPieChart(
+                                                          transactions: txList),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            : Column(
+                                                children: [
+                                                  SizedBox(
+                                                    height: 300,
+                                                    child: DashboardLineChart(
+                                                        transactions: txList,
+                                                        month: _selectedMonth),
+                                                  ),
+                                                  const SizedBox(height: 24),
+                                                  SizedBox(
+                                                    height: 240,
+                                                    child: DashboardPieChart(
+                                                        transactions: txList),
+                                                  ),
+                                                ],
                                               ),
-                                              const SizedBox(width: 24),
-                                              Expanded(
-                                                flex: 1,
-                                                child: DashboardPieChart(
-                                                    transactions: txList),
+                                      };
+
+                                      Widget buildDraggableBlock(String blockKey, double width) {
+                                        final blockWidget = blockWidgets[blockKey]!;
+                                        return DragTarget<String>(
+                                          onWillAcceptWithDetails: (details) => details.data != blockKey,
+                                          onAcceptWithDetails: (details) {
+                                            _swapCards(details.data, blockKey);
+                                          },
+                                          builder: (context, candidateData, rejectedData) {
+                                            final isHovered = candidateData.isNotEmpty;
+                                            return AnimatedContainer(
+                                              duration: const Duration(milliseconds: 200),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(24),
+                                                border: isHovered
+                                                    ? Border.all(color: AppColors.blueAccent, width: 2)
+                                                    : Border.all(color: Colors.transparent, width: 2),
+                                                boxShadow: isHovered
+                                                    ? [
+                                                        BoxShadow(
+                                                          color: AppColors.blueAccent.withOpacity(0.2),
+                                                          blurRadius: 12,
+                                                          spreadRadius: 2,
+                                                        )
+                                                      ]
+                                                    : null,
                                               ),
-                                            ],
-                                          ),
-                                        )
-                                      else
-                                        Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 300,
-                                              child: DashboardLineChart(
-                                                  transactions: txList,
-                                                  month: _selectedMonth),
-                                            ),
-                                            const SizedBox(height: 24),
-                                            SizedBox(
-                                              height: 240,
-                                              child: DashboardPieChart(
-                                                  transactions: txList),
-                                            ),
-                                          ],
-                                        ),
-                                      const SizedBox(height: 32),
-                                    ],
+                                              child: LongPressDraggable<String>(
+                                                data: blockKey,
+                                                delay: const Duration(milliseconds: 200),
+                                                feedback: Material(
+                                                  color: Colors.transparent,
+                                                  child: SizedBox(
+                                                    width: width,
+                                                    child: Opacity(
+                                                      opacity: 0.85,
+                                                      child: blockWidget,
+                                                    ),
+                                                  ),
+                                                ),
+                                                childWhenDragging: Container(
+                                                  decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(24),
+                                                    border: Border.all(
+                                                      color: AppColors.blueAccent.withOpacity(0.3),
+                                                      style: BorderStyle.solid,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                  child: Opacity(
+                                                    opacity: 0.25,
+                                                    child: blockWidget,
+                                                  ),
+                                                ),
+                                                child: blockWidget,
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }
+
+                                      if (isDesktop) {
+                                        return LayoutBuilder(
+                                          builder: (context, boxConstraints) {
+                                            final List<Widget> rows = [];
+                                            int i = 0;
+                                            while (i < _dashboardBlocks.length) {
+                                              final blockKey = _dashboardBlocks[i];
+                                              if (blockKey == 'summary' || blockKey == 'charts') {
+                                                rows.add(
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(bottom: 24),
+                                                    child: buildDraggableBlock(blockKey, boxConstraints.maxWidth),
+                                                  ),
+                                                );
+                                                i++;
+                                              } else {
+                                                if (i + 1 < _dashboardBlocks.length &&
+                                                    _dashboardBlocks[i + 1] != 'summary' &&
+                                                    _dashboardBlocks[i + 1] != 'charts') {
+                                                  final nextKey = _dashboardBlocks[i + 1];
+                                                  final cardWidth = (boxConstraints.maxWidth - 16) / 2;
+                                                  rows.add(
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(bottom: 24),
+                                                      child: IntrinsicHeight(
+                                                        child: Row(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment.stretch,
+                                                          children: [
+                                                            Expanded(child: buildDraggableBlock(blockKey, cardWidth)),
+                                                            const SizedBox(width: 16),
+                                                            Expanded(child: buildDraggableBlock(nextKey, cardWidth)),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                  i += 2;
+                                                } else {
+                                                  final cardWidth = (boxConstraints.maxWidth - 16) / 2;
+                                                  rows.add(
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(bottom: 24),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(child: buildDraggableBlock(blockKey, cardWidth)),
+                                                          const Spacer(),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                  i++;
+                                                }
+                                              }
+                                            }
+                                            return Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: rows,
+                                            );
+                                          },
+                                        );
+                                      } else {
+                                        return LayoutBuilder(
+                                          builder: (context, boxConstraints) {
+                                            final cardWidth = boxConstraints.maxWidth;
+                                            return Column(
+                                              children: _dashboardBlocks.map((blockKey) {
+                                                return Padding(
+                                                  padding: const EdgeInsets.only(bottom: 16),
+                                                  child: buildDraggableBlock(blockKey, cardWidth),
+                                                );
+                                              }).toList(),
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
                                   ),
                                 ),
                               ),
@@ -424,7 +565,6 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-      ),
     );
   }
 

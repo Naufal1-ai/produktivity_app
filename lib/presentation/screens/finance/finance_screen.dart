@@ -13,8 +13,7 @@ class FinanceScreen extends StatelessWidget {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor:
-            AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
+        backgroundColor: Colors.transparent,
         // ✅ GridBackground membungkus seluruh body termasuk semua tab
         body: SizedBox.expand(
           child: GridBackground(

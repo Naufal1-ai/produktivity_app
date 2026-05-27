@@ -95,8 +95,7 @@ class _PomodoroTimerScreenState extends State<PomodoroTimerScreen> {
             provider.isWorkSession ? AppColors.greenSuccess : AppColors.blueAccent;
 
         return Scaffold(
-          backgroundColor:
-              AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
+          backgroundColor: Colors.transparent,
           body: SizedBox.expand(
             child: GridBackground(
               child: SafeArea(

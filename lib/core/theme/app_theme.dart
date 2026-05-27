@@ -12,11 +12,12 @@ class AppColors {
   }
 
   // Background
+  // Warna bg kini diselaraskan dengan gradient Kanban agar semua tab terlihat konsisten
   static Color get bg =>
-      isDark ? const Color(0xFF0F1117) : const Color(0xFFF8FAFC);
-  static Color get bgCard => isDark ? const Color(0xFF1A1D2E) : Colors.white;
+      isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
+  static Color get bgCard => isDark ? const Color(0xFF1E293B) : Colors.white;
   static Color get bgCardAlt =>
-      isDark ? const Color(0xFF131620) : const Color(0xFFF1F5F9);
+      isDark ? const Color(0xFF1A2332) : const Color(0xFFE8EDF5);
 
   // Brand accent. Keep the old names so existing UI code follows the selected theme color.
   static Color get blueDark => _shiftLightness(brand, -0.34);
@@ -52,7 +53,7 @@ class AppTheme {
   static ThemeData get dark {
     return ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.bg,
+      scaffoldBackgroundColor: Colors.transparent,
       fontFamily: 'DMSans',
       colorScheme: ColorScheme.dark(
         primary: AppColors.blueAccent,
@@ -153,7 +154,7 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+      scaffoldBackgroundColor: Colors.transparent,
       fontFamily: 'DMSans',
       colorScheme: ColorScheme.light(
         primary: AppColors.blueAccent,

@@ -177,8 +177,7 @@ class _HabitTrackerScreenState extends State<HabitTrackerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          AppColors.isDark ? const Color(0xFF0F1117) : AppColors.bg,
+      backgroundColor: Colors.transparent,
       body: GridBackground(
         child: SafeArea(
           bottom: false,

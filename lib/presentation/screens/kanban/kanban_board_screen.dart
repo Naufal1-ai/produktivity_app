@@ -37,22 +37,13 @@ class KanbanBoardScreen extends StatefulWidget {
 
 class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   String? _draggingOverColumn;
-  late PageController _pageController;
-  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.86);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<KanbanBoardProvider>().initialize();
     });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
   }
 
   void _openCardFormSheet([KanbanCard? card, String preselectedColumn = 'Todo']) {
@@ -76,20 +67,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark
-                ? kBoardGradients[activeBoard?.colorIndex ?? 0]
-                : kBoardGradientsLight[activeBoard?.colorIndex ?? 0],
-          ),
-        ),
-        child: GridBackground(
-          child: SafeArea(
-            bottom: false,
-            child: Column(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        bottom: false,
+        child: Column(
               children: [
                 // Header Papan
                 Padding(
@@ -237,89 +218,23 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : isWideScreen
                           ? _buildColumnsHorizontalList(provider, columns, activeBoard)
-                          : Column(
-                              children: [
-                                Expanded(
-                                  child: _buildColumnsPageView(provider, columns, activeBoard),
-                                ),
-                                const SizedBox(height: 8),
-                                _buildPageIndicator(columns),
-                                const SizedBox(height: 16),
-                              ],
-                            ),
+                          : _buildColumnsVerticalList(provider, columns, activeBoard),
                 ),
               ],
             ),
           ),
-        ),
-      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 100),
         child: FloatingActionButton(
           onPressed: () {
             if (columns.isNotEmpty) {
-              _openCardFormSheet(null, columns[_currentPage < columns.length ? _currentPage : 0]);
+              _openCardFormSheet(null, columns.first);
             }
           },
           backgroundColor: AppColors.blueAccent,
           child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
-    );
-  }
-
-  // === HORIZONTAL PAGEVIEW UNTUK MOBILE ===
-  Widget _buildColumnsPageView(KanbanBoardProvider provider, List<String> columns, BoardModel board) {
-    final pageCount = columns.length + 1;
-    
-    return PageView.builder(
-      controller: _pageController,
-      itemCount: pageCount,
-      onPageChanged: (page) {
-        setState(() {
-          _currentPage = page;
-        });
-      },
-      itemBuilder: (context, index) {
-        if (index == columns.length) {
-          // Tombol tambah kolom di akhir PageView
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            child: Center(
-              child: GestureDetector(
-                onTap: () => _openAddColumnDialog(context, board, provider),
-                child: GlassContainer(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                  borderRadius: 24,
-                  color: Colors.white.withOpacity(0.08),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.add_chart_outlined, color: Colors.white.withOpacity(0.8), size: 36),
-                      const SizedBox(height: 12),
-                      Text(
-                        'Tambah Kolom Baru',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-        
-        final columnName = columns[index];
-        final cards = _getCardsForColumn(columnName, provider);
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: _buildColumn(context, columnName, cards, provider, board),
-        );
-      },
     );
   }
 
@@ -367,30 +282,56 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           width: 290,
           child: Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: _buildColumn(context, columnName, cards, provider, board),
+            child: _buildColumn(context, columnName, cards, provider, board, false),
           ),
         );
       },
     );
   }
 
-  Widget _buildPageIndicator(List<String> columns) {
-    if (columns.isEmpty) return const SizedBox.shrink();
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(columns.length + 1, (index) {
-        final isSelected = _currentPage == index;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          height: 6,
-          width: isSelected ? 16 : 6,
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.white.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(3),
-          ),
+  // === VERTICAL LIST UNTUK MOBILE ===
+  Widget _buildColumnsVerticalList(KanbanBoardProvider provider, List<String> columns, BoardModel board) {
+    return ListView.builder(
+      scrollDirection: Axis.vertical,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      itemCount: columns.length + 1,
+      itemBuilder: (context, index) {
+        if (index == columns.length) {
+          // Tombol tambah kolom di akhir vertical list
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16.0),
+            child: GestureDetector(
+              onTap: () => _openAddColumnDialog(context, board, provider),
+              child: GlassContainer(
+                padding: const EdgeInsets.all(20),
+                borderRadius: 24,
+                color: Colors.white.withOpacity(0.08),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add, color: Colors.white.withOpacity(0.8)),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Tambah Kolom',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.8),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        final columnName = columns[index];
+        final cards = _getCardsForColumn(columnName, provider);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: _buildColumn(context, columnName, cards, provider, board, true),
         );
-      }),
+      },
     );
   }
 
@@ -399,7 +340,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   }
 
   Widget _buildColumn(BuildContext context, String columnName,
-      List<KanbanCard> cards, KanbanBoardProvider provider, BoardModel board) {
+      List<KanbanCard> cards, KanbanBoardProvider provider, BoardModel board, bool isVerticalLayout) {
     final isHovered = _draggingOverColumn == columnName;
 
     return DragTarget<KanbanCard>(
@@ -538,16 +479,24 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     ),
                   )
                 else
-                  Flexible(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: cards.length,
-                      itemBuilder: (context, idx) {
-                        return _buildDraggableCard(context, cards[idx]);
-                      },
-                    ),
-                  ),
+                  isVerticalLayout
+                      ? ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: cards.length,
+                          itemBuilder: (context, idx) {
+                            return _buildDraggableCard(context, cards[idx]);
+                          },
+                        )
+                      : Flexible(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: cards.length,
+                            itemBuilder: (context, idx) {
+                              return _buildDraggableCard(context, cards[idx]);
+                            },
+                          ),
+                        ),
               ],
             ),
           ),

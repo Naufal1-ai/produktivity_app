@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/screens/finance/finance_screen.dart';
@@ -12,6 +13,8 @@ import 'package:productivity/presentation/screens/habit_tracker/habit_tracker_sc
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
 import 'package:productivity/presentation/screens/lending/lending_screen.dart';
 import 'package:productivity/presentation/screens/vehicle_service/vehicle_service_screen.dart';
+import 'package:productivity/presentation/widgets/grid_background.dart';
+import 'package:productivity/providers/kanban_board_provider.dart';
 
 /// Shell utama yang meng-host BottomNavigationBar + 5 tab
 class MainShell extends StatefulWidget {
@@ -43,6 +46,10 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final kanbanProvider = context.watch<KanbanBoardProvider>();
+    final activeBoard = kanbanProvider.activeBoard;
+    final isDark = widget.isDarkMode;
+
     final pages = [
       HomeScreen(
         onToggleTheme: widget.onToggleTheme,
@@ -286,7 +293,7 @@ class _MainShellState extends State<MainShell> {
                           Column(
                             children: [
                               Text(
-                                'v2.1.0',
+                                'v2.4.0',
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 11,
@@ -323,16 +330,42 @@ class _MainShellState extends State<MainShell> {
                           _scaffoldKey.currentState?.openDrawer(),
                     ),
                     Expanded(
-                      child: IndexedStack(
-                        index: _currentIndex,
-                        children: pages,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: isDark
+                                ? kBoardGradients[activeBoard?.colorIndex ?? 0]
+                                : kBoardGradientsLight[activeBoard?.colorIndex ?? 0],
+                          ),
+                        ),
+                        child: GridBackground(
+                          child: IndexedStack(
+                            index: _currentIndex,
+                            children: pages,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 )
-              : IndexedStack(
-                  index: _currentIndex,
-                  children: pages,
+              : Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: isDark
+                          ? kBoardGradients[activeBoard?.colorIndex ?? 0]
+                          : kBoardGradientsLight[activeBoard?.colorIndex ?? 0],
+                    ),
+                  ),
+                  child: GridBackground(
+                    child: IndexedStack(
+                      index: _currentIndex,
+                      children: pages,
+                    ),
+                  ),
                 ),
           floatingActionButton: _currentIndex == 0 && !isDesktop
               ? FloatingActionButton(
