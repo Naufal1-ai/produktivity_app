@@ -279,7 +279,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ).createShader(bounds);
                           },
                           blendMode: BlendMode.dstIn,
-                          child: CustomScrollView(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              await Future.delayed(const Duration(seconds: 1));
+                            },
+                            child: CustomScrollView(
                             slivers: [
                               // ── Kanban, Pomodoro, Habit, Charts ───────────────────────
                               SliverToBoxAdapter(
@@ -556,6 +560,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ],
                           ),
+                        ),
                         ),
                       ),
                     ],

@@ -150,7 +150,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: kTransactionCategories.map((cat) {
+                          children: kExpenseCategories.map((cat) {
                             final hasBudget = budgetedCats.contains(cat);
                             return GestureDetector(
                               onTap:

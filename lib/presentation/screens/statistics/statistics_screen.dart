@@ -39,7 +39,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _transactionStream = _repo.watchByMonth(_selectedMonth);
     _allTransactionsStream = _repo.watchAll();
   }
@@ -125,6 +125,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
             dividerColor: Colors.transparent,
             tabs: const [
               Tab(text: 'Pengeluaran'),
+              Tab(text: 'Pemasukan'),
               Tab(text: 'Tren 6 Bulan'),
             ],
           ),
@@ -139,7 +140,8 @@ class _StatisticsScreenState extends State<StatisticsScreen>
               return TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildPieTab(txList),
+                  _buildPieTab(txList, isIncome: false),
+                  _buildPieTab(txList, isIncome: true),
                   _buildBarTab(),
                 ],
               );
@@ -150,13 +152,13 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     );
   }
 
-  Widget _buildPieTab(List<TransactionModel> txList) {
-    final expenses = txList.where((t) => !t.isIncome).toList();
-    final total = expenses.fold(0.0, (s, t) => s + t.amount);
+  Widget _buildPieTab(List<TransactionModel> txList, {required bool isIncome}) {
+    final filtered = txList.where((t) => t.isIncome == isIncome).toList();
+    final total = filtered.fold(0.0, (s, t) => s + t.amount);
 
-    if (expenses.isEmpty) {
+    if (filtered.isEmpty) {
       return Center(
-        child: Text('Belum ada pengeluaran\nbulan ini 🎉',
+        child: Text(isIncome ? 'Belum ada pemasukan\nbulan ini 🎉' : 'Belum ada pengeluaran\nbulan ini 🎉',
             textAlign: TextAlign.center,
             style: TextStyle(
                 color: AppColors.textMuted, fontSize: 14, height: 1.6)),
@@ -164,7 +166,7 @@ class _StatisticsScreenState extends State<StatisticsScreen>
     }
 
     final Map<String, double> catMap = {};
-    for (final t in expenses) {
+    for (final t in filtered) {
       catMap[t.category] = (catMap[t.category] ?? 0) + t.amount;
     }
     final sorted = catMap.entries.toList()

@@ -524,6 +524,30 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
         child: _buildCardContent(card),
       ),
       child: GestureDetector(
+        onSecondaryTapUp: (details) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          showMenu<String>(
+            context: context,
+            position: RelativeRect.fromLTRB(
+              details.globalPosition.dx,
+              details.globalPosition.dy,
+              details.globalPosition.dx,
+              details.globalPosition.dy,
+            ),
+            color: isDark ? const Color(0xFF1E2127) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            items: [
+              const PopupMenuItem(value: 'edit', child: Text('Ubah Kartu')),
+              const PopupMenuItem(value: 'delete', child: Text('Hapus Kartu', style: TextStyle(color: Colors.red))),
+            ],
+          ).then((val) {
+            if (val == 'edit') {
+              _openCardFormSheet(card, card.column);
+            } else if (val == 'delete') {
+              _deleteCard(card.id);
+            }
+          });
+        },
         onTap: () {
           Navigator.push(
             context,

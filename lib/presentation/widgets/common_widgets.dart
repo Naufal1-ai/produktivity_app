@@ -136,6 +136,7 @@ class TransactionTile extends StatelessWidget {
       'Freelance': '💻',
       'Investasi': '📈',
       'Bonus': '🎁',
+      'Uang Saku': '💵',
       'Makan & Minum': '🍜',
       'Transport': '🚗',
       'Belanja': '🛒',
@@ -144,6 +145,7 @@ class TransactionTile extends StatelessWidget {
       'Hiburan': '🎬',
       'Pendidikan': '📚',
       'Bensin': '⛽',
+      'Parkir': '🅿️',
     };
     return map[tx.category] ?? (tx.isIncome ? '💰' : '💸');
   }

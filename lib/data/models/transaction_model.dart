@@ -5,13 +5,36 @@ const kTransactionCategories = [
   'Freelance',
   'Investasi',
   'Bonus',
+  'Uang Saku',
   'Makan & Minum',
   'Transport',
+  'Parkir',
   'Belanja',
   'Tagihan',
   'Kesehatan',
   'Hiburan',
   'Pendidikan',
+  'Lainnya',
+];
+
+const kExpenseCategories = [
+  'Makan & Minum',
+  'Transport',
+  'Parkir',
+  'Belanja',
+  'Tagihan',
+  'Kesehatan',
+  'Hiburan',
+  'Pendidikan',
+  'Lainnya',
+];
+
+const kIncomeCategories = [
+  'Gaji',
+  'Freelance',
+  'Investasi',
+  'Bonus',
+  'Uang Saku',
   'Lainnya',
 ];
 
@@ -49,7 +72,7 @@ class TransactionModel {
       date: (data['date'] as Timestamp).toDate(),
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
+          : (data['date'] as Timestamp).toDate(),
       imageUrl: data['imageUrl'] as String?,
     );
   }

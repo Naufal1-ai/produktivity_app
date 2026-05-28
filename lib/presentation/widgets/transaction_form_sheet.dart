@@ -52,7 +52,7 @@ class _TransactionFormSheetState extends State<TransactionFormSheet> {
   }
 
   bool get _isEditing => widget.existing != null;
-  List<String> get _categories => kTransactionCategories;
+  List<String> get _categories => _type == 'pengeluaran' ? kExpenseCategories : kIncomeCategories;
 
   @override
   void initState() {

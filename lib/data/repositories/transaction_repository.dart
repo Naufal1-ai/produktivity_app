@@ -16,9 +16,15 @@ class TransactionRepository {
   Stream<List<TransactionModel>> watchAll() {
     final col = _col;
     if (col == null) return Stream.value([]);
-    return col.orderBy('date', descending: true).snapshots().map(
-          (snap) => snap.docs.map(TransactionModel.fromDoc).toList(),
-        );
+    return col.orderBy('date', descending: true).snapshots().map((snap) {
+      final list = snap.docs.map(TransactionModel.fromDoc).toList();
+      list.sort((a, b) {
+        final c = b.date.compareTo(a.date);
+        if (c != 0) return c;
+        return b.createdAt.compareTo(a.createdAt);
+      });
+      return list;
+    });
   }
 
   Stream<List<TransactionModel>> watchByMonth(DateTime month) {
@@ -31,14 +37,28 @@ class TransactionRepository {
         .where('date', isLessThanOrEqualTo: Timestamp.fromDate(end))
         .orderBy('date', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map(TransactionModel.fromDoc).toList());
+        .map((snap) {
+          final list = snap.docs.map(TransactionModel.fromDoc).toList();
+          list.sort((a, b) {
+            final c = b.date.compareTo(a.date);
+            if (c != 0) return c;
+            return b.createdAt.compareTo(a.createdAt);
+          });
+          return list;
+        });
   }
 
   Future<List<TransactionModel>> getAll() async {
     final col = _col;
     if (col == null) return [];
     final snapshot = await col.orderBy('date', descending: true).get();
-    return snapshot.docs.map(TransactionModel.fromDoc).toList();
+    final list = snapshot.docs.map(TransactionModel.fromDoc).toList();
+    list.sort((a, b) {
+      final c = b.date.compareTo(a.date);
+      if (c != 0) return c;
+      return b.createdAt.compareTo(a.createdAt);
+    });
+    return list;
   }
 
   Future<void> add(TransactionModel tx) async {
