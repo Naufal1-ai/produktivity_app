@@ -1,5 +1,6 @@
 import 'dart:async';
-
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,7 +12,6 @@ import 'package:productivity/data/models/transaction_model.dart';
 import 'package:productivity/data/repositories/transaction_repository.dart';
 import 'package:productivity/data/models/lending_model.dart';
 import 'package:productivity/data/repositories/lending_repository.dart';
-import 'package:productivity/presentation/screens/lending/lending_screen.dart';
 import 'package:productivity/presentation/widgets/common_widgets.dart';
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
@@ -21,9 +21,8 @@ import 'package:productivity/presentation/widgets/dashboard_pie_chart.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:productivity/providers/pomodoro_provider.dart';
 import 'package:productivity/providers/habit_tracker_provider.dart';
-import 'package:productivity/presentation/screens/kanban/kanban_board_screen.dart';
-import 'package:productivity/presentation/screens/pomodoro/pomodoro_timer_screen.dart';
-import 'package:productivity/presentation/screens/habit_tracker/habit_tracker_screen.dart';
+import 'package:productivity/presentation/screens/shell/main_shell.dart';
+import 'package:productivity/presentation/screens/settings/edit_profile_screen.dart' show kLocalPhotoBase64Key;
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
@@ -49,6 +48,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late Stream<List<TransactionModel>> _transactionStream;
   late final Stream<List<LendingModel>> _lendingStream;
   List<String> _dashboardBlocks = ['summary', 'kanban', 'pomodoro', 'habit', 'lending', 'charts'];
+  Uint8List? _profilePhotoBytes;
+  String? _profileName;
 
   String get _greeting {
     final h = DateTime.now().hour;
@@ -57,12 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return 'Selamat Malam';
   }
 
-  String get _userEmail =>
-      _auth.currentUser?.email?.split('@').first ?? 'Pengguna';
+  String get _displayName =>
+      _profileName ?? _auth.currentUser?.displayName ?? _auth.currentUser?.email?.split('@').first ?? 'Pengguna';
 
   @override
   void initState() {
     super.initState();
+    _loadProfileData();
     _loadCardOrder();
     _transactionStream = _repo.watchByMonth(_selectedMonth);
     _lendingStream = _lendingRepo.watchAll();
@@ -71,6 +73,24 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<PomodoroProvider>().initialize();
       context.read<HabitTrackerProvider>().initialize();
     });
+  }
+
+  Future<void> _loadProfileData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final name = prefs.getString('profile_name');
+    final base64Photo = prefs.getString(kLocalPhotoBase64Key);
+    Uint8List? bytes;
+    if (base64Photo != null && base64Photo.isNotEmpty) {
+      try {
+        bytes = base64Decode(base64Photo);
+      } catch (_) {}
+    }
+    if (mounted) {
+      setState(() {
+        _profileName = name;
+        _profilePhotoBytes = bytes;
+      });
+    }
   }
 
   Future<void> _loadCardOrder() async {
@@ -105,16 +125,16 @@ class _HomeScreenState extends State<HomeScreen> {
       
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Row(
             children: [
               Icon(Icons.swap_horiz_rounded, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
-              const Text('Posisi kartu berhasil ditukar!'),
+              SizedBox(width: 8),
+              Text('Posisi kartu berhasil ditukar!'),
             ],
           ),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 1),
+          duration: Duration(seconds: 1),
         ),
       );
     }
@@ -201,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    '$_greeting, $_userEmail. • Tahan & geser kartu untuk mengubah posisi',
+                                    '$_greeting, $_displayName. • Tahan & geser kartu untuk mengubah posisi',
                                     style: TextStyle(
                                         color: AppColors.textMuted,
                                         fontSize: 13),
@@ -230,6 +250,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                       color: AppColors.textMuted,
                                       onPressed: widget.onToggleTheme,
                                     ),
+                                    const SizedBox(width: 8),
+                                    GestureDetector(
+                                      onTap: () => MainShell.changeTab(context, 8),
+                                      child: Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: AppColors.borderAccent,
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: _profilePhotoBytes != null
+                                            ? Image.memory(_profilePhotoBytes!, fit: BoxFit.cover)
+                                            : Icon(Icons.person, color: Colors.white, size: 20),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               )
@@ -255,6 +291,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                           borderRadius:
                                               BorderRadius.circular(12),
                                         ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    GestureDetector(
+                                      onTap: () => MainShell.changeTab(context, 8),
+                                      child: Container(
+                                        width: 44,
+                                        height: 44,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: AppColors.borderAccent,
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: _profilePhotoBytes != null
+                                            ? Image.memory(_profilePhotoBytes!, fit: BoxFit.cover)
+                                            : Icon(Icons.person, color: Colors.white, size: 24),
                                       ),
                                     ),
                                   ],
@@ -359,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 boxShadow: isHovered
                                                     ? [
                                                         BoxShadow(
-                                                          color: AppColors.blueAccent.withOpacity(0.2),
+                                                          color: AppColors.blueAccent.withValues(alpha: 0.2),
                                                           blurRadius: 12,
                                                           spreadRadius: 2,
                                                         )
@@ -383,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   decoration: BoxDecoration(
                                                     borderRadius: BorderRadius.circular(24),
                                                     border: Border.all(
-                                                      color: AppColors.blueAccent.withOpacity(0.3),
+                                                      color: AppColors.blueAccent.withValues(alpha: 0.3),
                                                       style: BorderStyle.solid,
                                                       width: 2,
                                                     ),
@@ -585,9 +637,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(20),
           child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const KanbanBoardScreen()),
-            ),
+            onTap: () => MainShell.changeTab(context, 3),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -673,9 +723,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(20),
           child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const PomodoroTimerScreen()),
-            ),
+            onTap: () => MainShell.changeTab(context, 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -729,9 +777,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(20),
           child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const HabitTrackerScreen()),
-            ),
+            onTap: () => MainShell.changeTab(context, 5),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -807,9 +853,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(20),
           child: InkWell(
             borderRadius: BorderRadius.circular(24),
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const LendingScreen()),
-            ),
+            onTap: () => MainShell.changeTab(context, 6),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -392,8 +392,8 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
     final scaffoldBg = isDark ? const Color(0xFF1E2127) : const Color(0xFFF4F5F7);
     final primaryTextColor = isDark ? Colors.white : const Color(0xFF172B4D);
     final secondaryTextColor = isDark ? Colors.white70 : const Color(0xFF5E6C84);
-    final cardBg = isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02);
-    final cardBorder = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08);
+    final cardBg = isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02);
+    final cardBorder = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08);
 
     return Scaffold(
       backgroundColor: scaffoldBg,
@@ -429,9 +429,9 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                     ),
                     child: DropdownButton<String>(
                       underline: const SizedBox.shrink(),
@@ -463,7 +463,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),
-                    child: Icon(Icons.radio_button_unchecked, color: secondaryTextColor.withOpacity(0.8), size: 22),
+                    child: Icon(Icons.radio_button_unchecked, color: secondaryTextColor.withValues(alpha: 0.8), size: 22),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -542,7 +542,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                                 width: 32,
                                 height: 32,
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                                  color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                                   shape: BoxShape.circle,
                                 ),
                                 alignment: Alignment.center,
@@ -597,7 +597,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                                  color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Icon(Icons.add, color: secondaryTextColor, size: 18),
@@ -629,9 +629,9 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                            border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                           ),
                           child: Row(
                             children: [
@@ -689,7 +689,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -709,18 +709,18 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                   decoration: InputDecoration(
                     hintText: 'Tambahkan deskripsi detail...',
                     filled: true,
-                    fillColor: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                    fillColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                      borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                      borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: isDark ? AppColors.greenSuccess : Colors.black.withOpacity(0.2)),
+                      borderSide: BorderSide(color: isDark ? AppColors.greenSuccess : Colors.black.withValues(alpha: 0.2)),
                     ),
                   ),
                 )
@@ -729,7 +729,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                    color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -821,14 +821,14 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                                       labelText: 'Kategori',
                                       labelStyle: TextStyle(color: secondaryTextColor, fontSize: 12),
                                       filled: true,
-                                      fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+                                      fillColor: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -858,14 +858,14 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                                       labelText: 'Prioritas',
                                       labelStyle: TextStyle(color: secondaryTextColor, fontSize: 12),
                                       filled: true,
-                                      fillColor: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+                                      fillColor: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
                                       border: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                                       ),
                                       enabledBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
-                                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderRadius: BorderRadius.circular(10),
@@ -909,18 +909,18 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: isDark ? Colors.white.withOpacity(0.06) : Colors.black.withOpacity(0.04)),
+          border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.06) : Colors.black.withValues(alpha: 0.04)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: isDark ? Colors.white.withOpacity(0.8) : const Color(0xFF172B4D).withOpacity(0.8), size: 16),
+            Icon(icon, color: isDark ? Colors.white.withValues(alpha: 0.8) : const Color(0xFF172B4D).withValues(alpha: 0.8), size: 16),
             const SizedBox(width: 8),
             Text(
               text,
-              style: TextStyle(color: isDark ? Colors.white.withOpacity(0.85) : primaryTextColor, fontSize: 13, fontWeight: FontWeight.bold),
+              style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.85) : primaryTextColor, fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -962,7 +962,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.12),
+                    color: Colors.red.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: const Text(
@@ -989,7 +989,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                   child: LinearProgressIndicator(
                     value: progress,
                     minHeight: 6,
-                    backgroundColor: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05),
+                    backgroundColor: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
                     valueColor: AlwaysStoppedAnimation(
                       progress == 1.0 ? AppColors.greenSuccess : const Color(0xFF5AAC44),
                     ),
@@ -1041,7 +1041,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                       icon: Icon(
                         Icons.close, 
                         size: 16, 
-                        color: isDark ? Colors.white.withOpacity(0.3) : const Color(0xFF172B4D).withOpacity(0.3),
+                        color: isDark ? Colors.white.withValues(alpha: 0.3) : const Color(0xFF172B4D).withValues(alpha: 0.3),
                       ),
                       onPressed: () => _deleteSubtaskItem(checklist.id, subtask.id),
                     ),
@@ -1063,21 +1063,21 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
                     style: TextStyle(fontSize: 13, color: primaryTextColor),
                     decoration: InputDecoration(
                       hintText: 'Tambah item baru...',
-                      hintStyle: TextStyle(color: secondaryTextColor.withOpacity(0.6)),
+                      hintStyle: TextStyle(color: secondaryTextColor.withValues(alpha: 0.6)),
                       filled: true,
-                      fillColor: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+                      fillColor: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
-                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
-                        borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.08)),
+                        borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.08)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(6),
-                        borderSide: BorderSide(color: isDark ? AppColors.greenSuccess : Colors.black.withOpacity(0.2)),
+                        borderSide: BorderSide(color: isDark ? AppColors.greenSuccess : Colors.black.withValues(alpha: 0.2)),
                       ),
                     ),
                   ),
@@ -1107,7 +1107,7 @@ class _KanbanCardDetailScreenState extends State<KanbanCardDetailScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+                  color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.02),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -447,19 +448,62 @@ class _WideLayoutState extends State<_WideLayout>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
   late final Animation<double> _float;
+  late final PageController _pageCtrl;
+  Timer? _timer;
+  int _currentIndex = 0;
+
+  final List<Map<String, dynamic>> _slides = [
+    {
+      'title': 'Kelola keuanganmu\ndengan mudah',
+      'desc': 'Catat pemasukan & pengeluaran,\npantau saldo real-time kapan saja.',
+      'center': '💰',
+      'orbs': ['📈', '💳', '🔔', '🏦']
+    },
+    {
+      'title': 'Tingkatkan produktivitas\nsetiap hari',
+      'desc': 'Gunakan Kanban Board & Pomodoro\nuntuk mengatur fokus dan jadwalmu.',
+      'center': '⚡',
+      'orbs': ['📅', '🎯', '⏱️', '📋']
+    },
+    {
+      'title': 'Bangun kebiasaan baik\nsecara konsisten',
+      'desc': 'Habit Tracker membantu memantau\nperkembangan target harianmu.',
+      'center': '⭐',
+      'orbs': ['🌱', '🔥', '💪', '🏆']
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
+    _pageCtrl = PageController();
     _ctrl =
         AnimationController(vsync: this, duration: const Duration(seconds: 3))
           ..repeat(reverse: true);
     _float = Tween(begin: 0.0, end: 8.0)
         .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (Timer timer) {
+      if (!mounted) return;
+      if (_currentIndex < _slides.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0;
+      }
+      if (_pageCtrl.hasClients) {
+        _pageCtrl.animateToPage(
+          _currentIndex,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
+    _pageCtrl.dispose();
     _ctrl.dispose();
     super.dispose();
   }
@@ -501,47 +545,71 @@ class _WideLayoutState extends State<_WideLayout>
             child: Stack(children: [
               Positioned(top: -80, left: -80, child: _buildRing(360)),
               Positioned(top: -20, left: -20, child: _buildRing(240)),
-              Center(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      AnimatedBuilder(
-                        animation: _float,
-                        builder: (_, __) => Transform.translate(
-                          offset: Offset(0, -_float.value),
-                          child: _buildIllustration(),
-                        ),
-                      ),
-                      const SizedBox(height: 28),
-                      const Text('Kelola keuanganmu\ndengan mudah',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              height: 1.4)),
-                      const SizedBox(height: 10),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 32),
-                        child: Text(
-                            'Catat pemasukan & pengeluaran,\npantau saldo real-time kapan saja.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13,
-                                height: 1.6)),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildDot(true),
-                            const SizedBox(width: 6),
-                            _buildDot(false),
-                            const SizedBox(width: 6),
-                            _buildDot(false),
-                          ]),
-                    ]),
+              Column(
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageCtrl,
+                      onPageChanged: (idx) {
+                        setState(() {
+                          _currentIndex = idx;
+                        });
+                      },
+                      itemCount: _slides.length,
+                      itemBuilder: (context, index) {
+                        final slide = _slides[index];
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              AnimatedBuilder(
+                                animation: _float,
+                                builder: (_, __) => Transform.translate(
+                                  offset: Offset(0, -_float.value),
+                                  child: _buildIllustration(
+                                    slide['center'],
+                                    slide['orbs'],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              Text(slide['title'],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w700,
+                                      height: 1.4)),
+                              const SizedBox(height: 10),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 32),
+                                child: Text(
+                                    slide['desc'],
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 13,
+                                        height: 1.6)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 40),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_slides.length, (index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 3),
+                          child: _buildDot(_currentIndex == index),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
               ),
             ]),
           ),
@@ -560,14 +628,14 @@ class _WideLayoutState extends State<_WideLayout>
         ),
       );
 
-  Widget _buildIllustration() => SizedBox(
+  Widget _buildIllustration(String centerEmoji, List<String> orbs) => SizedBox(
         width: 200,
         height: 200,
         child: Stack(alignment: Alignment.center, children: [
-          _buildOrb('📈', top: 0, left: 76),
-          _buildOrb('💳', top: 76, left: 0),
-          _buildOrb('🔔', top: 76, right: 0),
-          _buildOrb('🏦', bottom: 0, left: 76),
+          _buildOrb(orbs[0], top: 0, left: 76),
+          _buildOrb(orbs[1], top: 76, left: 0),
+          _buildOrb(orbs[2], top: 76, right: 0),
+          _buildOrb(orbs[3], bottom: 0, left: 76),
           Container(
             width: 62,
             height: 62,
@@ -576,7 +644,7 @@ class _WideLayoutState extends State<_WideLayout>
               borderRadius: BorderRadius.circular(18),
             ),
             child:
-                const Center(child: Text('💰', style: TextStyle(fontSize: 28))),
+                Center(child: Text(centerEmoji, style: const TextStyle(fontSize: 28))),
           ),
         ]),
       );

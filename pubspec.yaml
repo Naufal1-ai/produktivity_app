@@ -1,7 +1,7 @@
 name: productivity
 description: A new Flutter project.
 publish_to: 'none'
-version: 2.5.0+1
+version: 2.4.1+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -15,7 +15,7 @@ dependencies:
   cloud_firestore: ^5.0.1
   intl: 0.20.2
   google_sign_in: ^6.2.1
-  shared_preferences: ^2.3.2
+  shared_preferences: ^2.5.5
   provider: ^6.0.6
   fl_chart: ^0.69.0
   flutter_localizations:
@@ -30,6 +30,7 @@ dependencies:
   image_picker: ^1.1.2
   mix: ^2.0.3
   msix: ^3.16.13
+  firebase_storage: ^12.4.10
 
 dev_dependencies:
   flutter_test:

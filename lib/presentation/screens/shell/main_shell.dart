@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:productivity/presentation/screens/settings/edit_profile_screen.dart'
+    show kLocalPhotoBase64Key;
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/screens/finance/finance_screen.dart';
 import 'package:productivity/presentation/screens/home/home_screen.dart';
@@ -29,6 +34,11 @@ class MainShell extends StatefulWidget {
 
   @override
   State<MainShell> createState() => _MainShellState();
+
+  static void changeTab(BuildContext context, int index) {
+    final state = context.findAncestorStateOfType<_MainShellState>();
+    state?.changeTab(index);
+  }
 }
 
 class _MainShellState extends State<MainShell> {
@@ -42,6 +52,12 @@ class _MainShellState extends State<MainShell> {
       backgroundColor: Colors.transparent,
       builder: (_) => const TransactionFormSheet(),
     );
+  }
+
+  void changeTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
@@ -293,7 +309,7 @@ class _MainShellState extends State<MainShell> {
                           Column(
                             children: [
                               Text(
-                                'v2.4.0',
+                                'v2.4.1',
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 11,
@@ -392,7 +408,7 @@ class _MainShellState extends State<MainShell> {
 }
 
 // ─── Custom Side Navigation Bar for Desktop ─────────────────────────────────
-class _SideNav extends StatelessWidget {
+class _SideNav extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback onToggleTheme;
@@ -421,7 +437,36 @@ class _SideNav extends StatelessWidget {
   });
 
   @override
+  State<_SideNav> createState() => _SideNavState();
+}
+
+class _SideNavState extends State<_SideNav> {
+  Uint8List? _profilePhotoBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfilePhoto();
+  }
+
+  Future<void> _loadProfilePhoto() async {
+    final prefs = await SharedPreferences.getInstance();
+    final base64Photo = prefs.getString(kLocalPhotoBase64Key);
+    if (base64Photo != null && base64Photo.isNotEmpty) {
+      try {
+        final bytes = base64Decode(base64Photo);
+        if (mounted) setState(() => _profilePhotoBytes = bytes);
+      } catch (_) {}
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isDarkMode = widget.isDarkMode;
+    final currentIndex = widget.currentIndex;
+    final onTap = widget.onTap;
+    final onToggleTheme = widget.onToggleTheme;
+    final onOpenDrawer = widget.onOpenDrawer;
     return Container(
       width: 80,
       decoration: BoxDecoration(
@@ -459,8 +504,8 @@ class _SideNav extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 48),
-          ...List.generate(_items.length, (i) {
-            final item = _items[i];
+          ...List.generate(_SideNav._items.length, (i) {
+            final item = _SideNav._items[i];
             final isActive = i == currentIndex;
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
@@ -641,17 +686,28 @@ class _SideNav extends StatelessWidget {
             tooltip: isDarkMode ? 'Mode Terang' : 'Mode Gelap',
           ),
           const SizedBox(height: 8),
-          Container(
-            width: 40,
-            height: 40,
-            margin: const EdgeInsets.only(bottom: 24),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.borderAccent,
-              image: const DecorationImage(
-                image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                fit: BoxFit.cover,
+          // Avatar foto profil lokal pengguna
+          GestureDetector(
+            onTap: () => onTap(8), // Navigasi ke halaman Pengaturan
+            child: Container(
+              width: 40,
+              height: 40,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.borderAccent,
               ),
+              clipBehavior: Clip.antiAlias,
+              child: _profilePhotoBytes != null
+                  ? Image.memory(
+                      _profilePhotoBytes!,
+                      fit: BoxFit.cover,
+                    )
+                  : Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 22,
+                    ),
             ),
           ),
         ],

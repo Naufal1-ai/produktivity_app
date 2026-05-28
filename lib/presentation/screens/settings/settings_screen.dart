@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:productivity/l10n/app_localizations.dart';
 import 'package:productivity/services/settings_service.dart';
-import 'package:productivity/presentation/screens/settings/edit_profile_screen.dart';
+import 'package:productivity/presentation/screens/settings/edit_profile_screen.dart'
+    show EditProfileScreen, kLocalPhotoBase64Key;
 import 'package:productivity/presentation/screens/settings/support_screen.dart';
 import 'package:productivity/presentation/screens/settings/pin_setup_screen.dart';
 import 'package:productivity/presentation/screens/settings/theme_color_screen.dart';
@@ -26,11 +30,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final User? _user = FirebaseAuth.instance.currentUser;
+  User? get _user => FirebaseAuth.instance.currentUser;
   late SettingsService _settingsService;
   bool _dailyReminder = false;
   bool _weeklyReminder = false;
   bool _isInitialized = false;
+  Uint8List? _savedPhotoBytes; // Foto profil dari Base64 SharedPreferences
+  String? _profileName;        // Nama yang disimpan lokal
 
   @override
   void initState() {
@@ -41,12 +47,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     await _settingsService.init();
+    final prefs = await SharedPreferences.getInstance();
+    Uint8List? photoBytes;
+    final base64Photo = prefs.getString(kLocalPhotoBase64Key);
+    if (base64Photo != null && base64Photo.isNotEmpty) {
+      try {
+        photoBytes = base64Decode(base64Photo);
+      } catch (_) {}
+    }
     if (!mounted) return;
     setState(() {
       _dailyReminder = _settingsService.dailyReminder;
       _weeklyReminder = _settingsService.weeklyReminder;
+      _savedPhotoBytes = photoBytes;
+      _profileName = prefs.getString('profile_name');
       _isInitialized = true;
     });
+  }
+
+  /// Tampilkan avatar dari Base64 bytes, fallback ke ikon default
+  Widget _buildLocalAvatar(double size) {
+    if (_savedPhotoBytes != null) {
+      return ClipOval(
+        child: Image.memory(
+          _savedPhotoBytes!,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+    return Icon(
+      Icons.person,
+      color: Colors.white,
+      size: size * 0.5,
+    );
   }
 
   @override
@@ -120,11 +155,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               )
                             ],
                           ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 30,
-                          ),
+                          child: _buildLocalAvatar(60),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -132,7 +163,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _user?.displayName ?? 'Pengguna',
+                                _profileName ?? _user?.displayName ?? 'Pengguna',
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
@@ -146,8 +177,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                         ),
                         IconButton(
-                          onPressed: () {
-                            Navigator.push(
+                          onPressed: () async {
+                            final changed = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => EditProfileScreen(
@@ -156,6 +187,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ),
                             );
+                            if (changed == true) {
+                              // Reload foto dan nama setelah kembali dari edit profile
+                              final prefs = await SharedPreferences.getInstance();
+                              Uint8List? newBytes;
+                              final b64 = prefs.getString(kLocalPhotoBase64Key);
+                              if (b64 != null && b64.isNotEmpty) {
+                                try { newBytes = base64Decode(b64); } catch (_) {}
+                              }
+                              if (!mounted) return;
+                              setState(() {
+                                _savedPhotoBytes = newBytes;
+                                _profileName = prefs.getString('profile_name');
+                              });
+                            }
                           },
                           icon: Icon(
                             Icons.edit,

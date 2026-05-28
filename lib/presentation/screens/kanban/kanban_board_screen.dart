@@ -6,7 +6,6 @@ import 'package:productivity/data/models/board_model.dart';
 import 'package:productivity/data/models/kanban_board_model.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:productivity/presentation/widgets/glass_container.dart';
-import 'package:productivity/presentation/widgets/grid_background.dart';
 import 'package:productivity/presentation/widgets/kanban_card_form_sheet.dart';
 import 'package:productivity/presentation/screens/kanban/kanban_card_detail_screen.dart';
 
@@ -82,7 +81,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08),
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -111,7 +110,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                                 Text(
                                   activeBoard.description,
                                   style: TextStyle(
-                                    color: isDark ? Colors.white.withOpacity(0.7) : const Color(0xFF334155),
+                                    color: isDark ? Colors.white.withValues(alpha: 0.7) : const Color(0xFF334155),
                                     fontSize: 11,
                                   ),
                                   maxLines: 1,
@@ -121,7 +120,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                                 Text(
                                   'Ketuk untuk mengganti papan',
                                   style: TextStyle(
-                                    color: isDark ? Colors.white.withOpacity(0.5) : const Color(0xFF64748B),
+                                    color: isDark ? Colors.white.withValues(alpha: 0.5) : const Color(0xFF64748B),
                                     fontSize: 10,
                                   ),
                                 ),
@@ -139,7 +138,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08),
+                            color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -165,8 +164,8 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                       return GlassContainer(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         borderRadius: 18,
-                        color: isDark ? Colors.white.withOpacity(0.08) : Colors.white.withOpacity(0.4),
-                        border: Border.all(color: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08)),
+                        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.4),
+                        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08)),
                         child: Row(
                           children: [
                             Icon(
@@ -189,7 +188,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                                 child: LinearProgressIndicator(
                                   value: progress,
                                   minHeight: 7,
-                                  backgroundColor: isDark ? Colors.white.withOpacity(0.15) : Colors.black.withOpacity(0.08),
+                                  backgroundColor: isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08),
                                   valueColor: const AlwaysStoppedAnimation(
                                     AppColors.greenSuccess,
                                   ),
@@ -256,16 +255,16 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
               child: GlassContainer(
                 padding: const EdgeInsets.all(20),
                 borderRadius: 24,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add, color: Colors.white.withOpacity(0.8)),
+                    Icon(Icons.add, color: Colors.white.withValues(alpha: 0.8)),
                     const SizedBox(width: 8),
                     Text(
                       'Tambah Kolom',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -305,16 +304,16 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
               child: GlassContainer(
                 padding: const EdgeInsets.all(20),
                 borderRadius: 24,
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.add, color: Colors.white.withOpacity(0.8)),
+                    Icon(Icons.add, color: Colors.white.withValues(alpha: 0.8)),
                     const SizedBox(width: 8),
                     Text(
                       'Tambah Kolom',
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.8),
+                        color: Colors.white.withValues(alpha: 0.8),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -384,8 +383,8 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             padding: const EdgeInsets.all(14),
             borderRadius: 24,
             color: isDark
-                ? (isHovered ? Colors.white.withOpacity(0.12) : Colors.white.withOpacity(0.06))
-                : (isHovered ? Colors.black.withOpacity(0.08) : Colors.black.withOpacity(0.04)),
+                ? (isHovered ? Colors.white.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.06))
+                : (isHovered ? Colors.black.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -409,7 +408,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.2) : Colors.black.withOpacity(0.08),
+                        color: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -453,9 +452,9 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     margin: const EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.04),
+                      color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.04),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: isDark ? Colors.white.withOpacity(0.3) : Colors.black26),
+                      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black26),
                     ),
                     child: Text(
                       'Lepas untuk memindahkan ke sini',
@@ -474,7 +473,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     child: Center(
                       child: Text(
                         'Tidak ada kartu',
-                        style: TextStyle(color: isDark ? Colors.white.withOpacity(0.5) : Colors.black54, fontSize: 13),
+                        style: TextStyle(color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black54, fontSize: 13),
                       ),
                     ),
                   )
@@ -573,10 +572,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1E2127) : const Color(0xFFF4F5F7),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08)),
+                      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -605,7 +604,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             ? null
             : [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -616,9 +615,9 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
         borderRadius: 16,
         blur: 16,
         color: isDragging
-            ? (isDark ? Colors.white.withOpacity(0.2) : Colors.white)
-            : (isDark ? Colors.white.withOpacity(0.12) : Colors.white),
-        border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08)),
+            ? (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.white)
+            : (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.white),
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -647,7 +646,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Icon(Icons.drag_handle, size: 14, color: isDark ? Colors.white.withOpacity(0.5) : Colors.black45),
+              Icon(Icons.drag_handle, size: 14, color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -664,7 +663,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
               if (!isDragging)
                 GestureDetector(
                   onTap: () => _deleteCard(card.id),
-                  child: Icon(Icons.close, size: 16, color: isDark ? Colors.white.withOpacity(0.5) : Colors.black45),
+                  child: Icon(Icons.close, size: 16, color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45),
                 ),
             ],
           ),
@@ -672,7 +671,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             const SizedBox(height: 6),
             Text(
               card.description,
-              style: TextStyle(fontSize: 11, color: isDark ? Colors.white.withOpacity(0.7) : Colors.black87),
+              style: TextStyle(fontSize: 11, color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black87),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -703,8 +702,8 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
                                 color: isAllDone
-                                    ? AppColors.greenSuccess.withOpacity(0.24)
-                                    : (isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05)),
+                                    ? AppColors.greenSuccess.withValues(alpha: 0.24)
+                                    : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05)),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Row(
@@ -734,8 +733,8 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: isDark 
-                                ? AppColors.blueAccent.withOpacity(0.24)
-                                : AppColors.blueAccent.withOpacity(0.12),
+                                ? AppColors.blueAccent.withValues(alpha: 0.24)
+                                : AppColors.blueAccent.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -762,14 +761,14 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05),
+                            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             card.category!,
                             style: TextStyle(
                               fontSize: 9.5,
-                              color: isDark ? Colors.white.withOpacity(0.8) : Colors.black87,
+                              color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black87,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -779,10 +778,10 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
                             color: card.priority == 'High'
-                                ? AppColors.expense.withOpacity(0.24)
+                                ? AppColors.expense.withValues(alpha: 0.24)
                                 : card.priority == 'Low'
-                                    ? (isDark ? Colors.white.withOpacity(0.1) : Colors.black.withOpacity(0.05))
-                                    : AppColors.income.withOpacity(0.24),
+                                    ? (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05))
+                                    : AppColors.income.withValues(alpha: 0.24),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -954,7 +953,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                                           Text(
                                             b.description,
                                             style: TextStyle(
-                                              color: Colors.white.withOpacity(0.8),
+                                              color: Colors.white.withValues(alpha: 0.8),
                                               fontSize: 11,
                                             ),
                                             maxLines: 1,

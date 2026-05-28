@@ -219,7 +219,7 @@ class _KanbanCardFormSheetState extends State<KanbanCardFormSheet> {
 
           // Column Selector Dropdown
           DropdownButtonFormField<String>(
-            value: displayColumn,
+            initialValue: displayColumn,
             decoration: const InputDecoration(labelText: 'Kolom Papan'),
             items: boardCols
                 .map((col) => DropdownMenuItem<String>(value: col, child: Text(col)))
