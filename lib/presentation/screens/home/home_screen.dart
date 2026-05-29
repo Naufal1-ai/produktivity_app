@@ -633,6 +633,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final progress = kanbanProvider.getProgressPercentage();
 
         return GlassContainer(
+          showRetroWindowBar: true,
+          retroWindowBarColor: AppColors.retroBlue,
           borderRadius: 24,
           padding: const EdgeInsets.all(20),
           child: InkWell(
@@ -719,6 +721,8 @@ class _HomeScreenState extends State<HomeScreen> {
             : 'Tidak berjalan';
 
         return GlassContainer(
+          showRetroWindowBar: true,
+          retroWindowBarColor: AppColors.retroPink,
           borderRadius: 24,
           padding: const EdgeInsets.all(20),
           child: InkWell(
@@ -773,6 +777,8 @@ class _HomeScreenState extends State<HomeScreen> {
         final streak = habitProvider.getStreak();
 
         return GlassContainer(
+          showRetroWindowBar: true,
+          retroWindowBarColor: AppColors.retroTeal,
           borderRadius: 24,
           padding: const EdgeInsets.all(20),
           child: InkWell(
@@ -849,6 +855,8 @@ class _HomeScreenState extends State<HomeScreen> {
             .length;
 
         return GlassContainer(
+          showRetroWindowBar: true,
+          retroWindowBarColor: AppColors.retroYellow,
           borderRadius: 24,
           padding: const EdgeInsets.all(20),
           child: InkWell(

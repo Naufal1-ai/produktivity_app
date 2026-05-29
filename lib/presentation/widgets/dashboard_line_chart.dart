@@ -62,6 +62,8 @@ class DashboardLineChart extends StatelessWidget {
     const expenseColor = Color(0xFFFBBF24); // Premium yellow
 
     return GlassContainer(
+      showRetroWindowBar: true,
+      retroWindowBarColor: AppColors.retroTeal,
       padding: const EdgeInsets.all(20),
       borderRadius: 24,
       child: Column(

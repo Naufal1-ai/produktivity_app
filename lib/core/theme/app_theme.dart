@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:productivity/main.dart' show themeColorNotifier, themeNotifier;
+import 'package:productivity/main.dart'
+    show appStyleNotifier, themeColorNotifier, themeNotifier;
+import 'package:productivity/core/theme/app_style_theme.dart';
 
 class AppColors {
   static bool get isDark => themeNotifier.value == ThemeMode.dark;
+  static bool get isSaweriaClassic =>
+      appStyleNotifier.value == AppStyleTheme.saweriaClassic;
   static Color get brand => themeColorNotifier.value;
+  static const retroInk = Color(0xFF232120);
+  static const retroCream = Color(0xFFF3E9DD);
+  static const retroPaper = Color(0xFFFFFDF8);
+  static const retroTeal = Color(0xFF5CCAB4);
+  static const retroBlue = Color(0xFF88BBFF);
+  static const retroPink = Color(0xFFFF8B9C);
+  static const retroYellow = Color(0xFFFFB338);
   static Color _shiftLightness(Color color, double amount) {
     final hsl = HSLColor.fromColor(color);
     return hsl
@@ -13,40 +24,90 @@ class AppColors {
 
   // Background
   // Warna bg kini diselaraskan dengan gradient Kanban agar semua tab terlihat konsisten
-  static Color get bg =>
-      isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
-  static Color get bgCard => isDark ? const Color(0xFF1E293B) : Colors.white;
-  static Color get bgCardAlt =>
-      isDark ? const Color(0xFF1A2332) : const Color(0xFFE8EDF5);
+  static Color get bg {
+    if (isSaweriaClassic) {
+      return retroCream;
+    }
+    return isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
+  }
+
+  static Color get bgCard {
+    if (isSaweriaClassic) {
+      return retroPaper;
+    }
+    return isDark ? const Color(0xFF1E293B) : Colors.white;
+  }
+
+  static Color get bgCardAlt {
+    if (isSaweriaClassic) {
+      return const Color(0xFFFFE2B5);
+    }
+    return isDark ? const Color(0xFF1A2332) : const Color(0xFFE8EDF5);
+  }
 
   // Brand accent. Keep the old names so existing UI code follows the selected theme color.
-  static Color get blueDark => _shiftLightness(brand, -0.34);
-  static Color get blueMid => _shiftLightness(brand, -0.08);
-  static Color get blueBorder => _shiftLightness(brand, 0.02);
-  static Color get blueAccent => brand;
-  static Color get blueText => _shiftLightness(brand, 0.24);
-  static Color get blueMuted => _shiftLightness(brand, 0.14);
-  static Color get primaryWeb => brand;
+  static Color get _activeBrand => isSaweriaClassic ? retroTeal : brand;
+  static Color get blueDark => isSaweriaClassic
+      ? const Color(0xFF27837E)
+      : _shiftLightness(_activeBrand, -0.34);
+  static Color get blueMid =>
+      isSaweriaClassic ? retroYellow : _shiftLightness(_activeBrand, -0.08);
+  static Color get blueBorder =>
+      isSaweriaClassic ? retroInk : _shiftLightness(_activeBrand, 0.02);
+  static Color get blueAccent => _activeBrand;
+  static Color get blueText =>
+      isSaweriaClassic ? retroInk : _shiftLightness(_activeBrand, 0.24);
+  static Color get blueMuted =>
+      isSaweriaClassic ? retroBlue : _shiftLightness(_activeBrand, 0.14);
+  static Color get primaryWeb => _activeBrand;
 
   // Text
-  static Color get textPrimary =>
-      isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
-  static Color get textSecondary =>
-      isDark ? const Color(0xFFA6ABB4) : const Color(0xFF334155);
-  static Color get textMuted =>
-      isDark ? const Color(0xFF6B7280) : const Color(0xFF64748B);
-  static Color get textDim =>
-      isDark ? const Color(0xFF4B5563) : const Color(0xFF94A3B8);
+  static Color get textPrimary {
+    if (isSaweriaClassic) {
+      return retroInk;
+    }
+    return isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+  }
+
+  static Color get textSecondary {
+    if (isSaweriaClassic) {
+      return const Color(0xFF5F5549);
+    }
+    return isDark ? const Color(0xFFA6ABB4) : const Color(0xFF334155);
+  }
+
+  static Color get textMuted {
+    if (isSaweriaClassic) {
+      return const Color(0xFF7C7165);
+    }
+    return isDark ? const Color(0xFF6B7280) : const Color(0xFF64748B);
+  }
+
+  static Color get textDim {
+    if (isSaweriaClassic) {
+      return const Color(0xFFA99E92);
+    }
+    return isDark ? const Color(0xFF4B5563) : const Color(0xFF94A3B8);
+  }
 
   // Semantic
-  static const income = Color(0xFF10B981); // Success Green
+  static const income = Color(0xFF10B981);
   static const greenSuccess = Color(0xFF10B981);
-  static const expense = Color(0xFFEF4444); // Danger Red
-  static const purple = Color(0xFF8B5CF6); // Accent Purple
-  static Color get border =>
-      isDark ? const Color(0xFF1E2130) : const Color(0xFFE2E8F0);
-  static Color get borderAccent =>
-      isDark ? const Color(0xFF2A2D3E) : const Color(0xFFCBD5E1);
+  static const expense = Color(0xFFEF4444);
+  static const purple = Color(0xFF8B5CF6);
+  static Color get border {
+    if (isSaweriaClassic) {
+      return retroInk;
+    }
+    return isDark ? const Color(0xFF1E2130) : const Color(0xFFE2E8F0);
+  }
+
+  static Color get borderAccent {
+    if (isSaweriaClassic) {
+      return retroInk;
+    }
+    return isDark ? const Color(0xFF2A2D3E) : const Color(0xFFCBD5E1);
+  }
 }
 
 class AppTheme {
@@ -62,7 +123,8 @@ class AppTheme {
         error: AppColors.expense,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.bg,
+        backgroundColor:
+            AppColors.isSaweriaClassic ? AppColors.bgCardAlt : AppColors.bg,
         elevation: 0,
         titleTextStyle: TextStyle(
           color: AppColors.textPrimary,
@@ -76,8 +138,12 @@ class AppTheme {
         color: AppColors.bgCard,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppColors.border),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 8 : 16),
+          side: BorderSide(
+            color: AppColors.border,
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -86,8 +152,12 @@ class AppTheme {
           foregroundColor: AppColors.blueText,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: AppColors.blueBorder),
+            borderRadius:
+                BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 14),
+            side: BorderSide(
+              color: AppColors.blueBorder,
+              width: AppColors.isSaweriaClassic ? 2.5 : 1,
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: const TextStyle(
@@ -103,19 +173,31 @@ class AppTheme {
         labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
         hintStyle: TextStyle(color: AppColors.textDim, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderAccent),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.borderAccent,
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.borderAccent),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.borderAccent,
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.blueBorder, width: 1.5),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.blueBorder,
+            width: AppColors.isSaweriaClassic ? 3 : 1.5,
+          ),
         ),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       ),
       textTheme: TextTheme(
         displayLarge: TextStyle(
@@ -163,10 +245,13 @@ class AppTheme {
         error: AppColors.expense,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: Colors.white,
+        backgroundColor:
+            AppColors.isSaweriaClassic ? AppColors.bgCardAlt : Colors.white,
         elevation: 0,
-        titleTextStyle: const TextStyle(
-          color: Color(0xFF0F172A),
+        titleTextStyle: TextStyle(
+          color: AppColors.isSaweriaClassic
+              ? AppColors.retroInk
+              : const Color(0xFF0F172A),
           fontSize: 18,
           fontWeight: FontWeight.w500,
           fontFamily: 'DMSans',
@@ -174,11 +259,17 @@ class AppTheme {
         iconTheme: IconThemeData(color: AppColors.textSecondary),
       ),
       cardTheme: CardThemeData(
-        color: Colors.white,
+        color: AppColors.isSaweriaClassic ? AppColors.bgCard : Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 8 : 16),
+          side: BorderSide(
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFFE2E8F0),
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -187,8 +278,12 @@ class AppTheme {
           foregroundColor: AppColors.blueText,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: AppColors.blueBorder),
+            borderRadius:
+                BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 14),
+            side: BorderSide(
+              color: AppColors.blueBorder,
+              width: AppColors.isSaweriaClassic ? 2.5 : 1,
+            ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           textStyle: const TextStyle(
@@ -200,47 +295,86 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white,
+        fillColor: AppColors.isSaweriaClassic ? AppColors.bgCard : Colors.white,
         labelStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
         hintStyle: TextStyle(color: AppColors.textDim, fontSize: 14),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFFE2E8F0),
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFFE2E8F0),
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.blueBorder, width: 1.5),
+          borderRadius:
+              BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 12),
+          borderSide: BorderSide(
+            color: AppColors.blueBorder,
+            width: AppColors.isSaweriaClassic ? 3 : 1.5,
+          ),
         ),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFF0F172A),
             fontSize: 36,
             fontWeight: FontWeight.w400,
             fontFamily: 'DMSerifDisplay'),
         headlineMedium: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFF0F172A),
             fontSize: 22,
             fontWeight: FontWeight.w400,
             fontFamily: 'DMSerifDisplay'),
         titleLarge: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFF0F172A),
             fontSize: 18,
             fontWeight: FontWeight.w500),
         titleMedium: TextStyle(
-            color: Color(0xFF0F172A),
+            color: AppColors.isSaweriaClassic
+                ? AppColors.retroInk
+                : const Color(0xFF0F172A),
             fontSize: 15,
             fontWeight: FontWeight.w500),
-        bodyLarge: TextStyle(color: Color(0xFF0F172A), fontSize: 15),
-        bodyMedium: TextStyle(color: Color(0xFF475569), fontSize: 13),
+        bodyLarge: TextStyle(
+          color: AppColors.isSaweriaClassic
+              ? AppColors.retroInk
+              : const Color(0xFF0F172A),
+          fontSize: 15,
+        ),
+        bodyMedium: TextStyle(
+          color: AppColors.isSaweriaClassic
+              ? const Color(0xFF5F5549)
+              : const Color(0xFF475569),
+          fontSize: 13,
+        ),
         labelSmall: TextStyle(
-            color: Color(0xFF64748B), fontSize: 11, letterSpacing: 0.8),
+          color: AppColors.isSaweriaClassic
+              ? const Color(0xFF7C7165)
+              : const Color(0xFF64748B),
+          fontSize: 11,
+          letterSpacing: 0.8,
+        ),
       ),
       dividerColor: const Color(0xFFE2E8F0),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(

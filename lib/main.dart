@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:productivity/core/theme/app_style_theme.dart';
 import 'package:productivity/firebase_options.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/presentation/screens/auth/login_screen.dart';
@@ -22,6 +23,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Satu sumber kebenaran untuk dark mode
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
 final themeColorNotifier = ValueNotifier<Color>(const Color(0xFF4F46E5));
+final appStyleNotifier = ValueNotifier<AppStyleTheme>(AppStyleTheme.modern);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +44,7 @@ void main() async {
   final settingsService = SettingsService();
   await settingsService.init();
   themeColorNotifier.value = settingsService.themeColor;
+  appStyleNotifier.value = settingsService.appStyle;
 
   final prefs = await SharedPreferences.getInstance();
   final rememberMe = prefs.getBool('remember_me') ?? true;
@@ -81,45 +84,48 @@ class MyApp extends StatelessWidget {
       ],
       child: ValueListenableBuilder<ThemeMode>(
         valueListenable: themeNotifier,
-        builder: (_, mode, __) => ValueListenableBuilder<Color>(
-          valueListenable: themeColorNotifier,
-          builder: (_, color, __) => Consumer<LocalizationProvider>(
-            builder: (context, localizationProvider, child) => MaterialApp(
-              title: 'Productivity',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.light,
-              darkTheme: AppTheme.dark,
-              themeMode: mode,
-              locale: localizationProvider.locale,
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [
-                Locale('en'), // English
-                Locale('id'), // Indonesian
-              ],
-              home: StreamBuilder<User?>(
-                stream: FirebaseAuth.instance.authStateChanges(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Scaffold();
-                  }
-                  if (snapshot.hasData) {
-                    return MainShell(
-                      onToggleTheme: () {
-                        themeNotifier.value =
-                            themeNotifier.value == ThemeMode.dark
-                                ? ThemeMode.light
-                                : ThemeMode.dark;
-                      },
-                      isDarkMode: mode == ThemeMode.dark,
-                    );
-                  }
-                  return const LoginScreen();
-                },
+        builder: (_, mode, __) => ValueListenableBuilder<AppStyleTheme>(
+          valueListenable: appStyleNotifier,
+          builder: (_, style, __) => ValueListenableBuilder<Color>(
+            valueListenable: themeColorNotifier,
+            builder: (_, color, __) => Consumer<LocalizationProvider>(
+              builder: (context, localizationProvider, child) => MaterialApp(
+                title: 'Productivity',
+                debugShowCheckedModeBanner: false,
+                theme: AppTheme.light,
+                darkTheme: AppTheme.dark,
+                themeMode: mode,
+                locale: localizationProvider.locale,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [
+                  Locale('en'), // English
+                  Locale('id'), // Indonesian
+                ],
+                home: StreamBuilder<User?>(
+                  stream: FirebaseAuth.instance.authStateChanges(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Scaffold();
+                    }
+                    if (snapshot.hasData) {
+                      return MainShell(
+                        onToggleTheme: () {
+                          themeNotifier.value =
+                              themeNotifier.value == ThemeMode.dark
+                                  ? ThemeMode.light
+                                  : ThemeMode.dark;
+                        },
+                        isDarkMode: mode == ThemeMode.dark,
+                      );
+                    }
+                    return const LoginScreen();
+                  },
+                ),
               ),
             ),
           ),
@@ -128,4 +134,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-

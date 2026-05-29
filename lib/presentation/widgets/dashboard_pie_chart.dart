@@ -34,6 +34,8 @@ class DashboardPieChart extends StatelessWidget {
     ];
 
     return GlassContainer(
+      showRetroWindowBar: true,
+      retroWindowBarColor: AppColors.retroPink,
       padding: const EdgeInsets.all(20),
       borderRadius: 24,
       child: Column(

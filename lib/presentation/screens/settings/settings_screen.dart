@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:productivity/core/theme/app_theme.dart';
+import 'package:productivity/core/theme/app_style_theme.dart';
+import 'package:productivity/main.dart' show appStyleNotifier;
 import 'package:productivity/presentation/widgets/glass_container.dart';
 import 'package:productivity/l10n/app_localizations.dart';
 import 'package:productivity/services/settings_service.dart';
@@ -34,9 +36,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late SettingsService _settingsService;
   bool _dailyReminder = false;
   bool _weeklyReminder = false;
+  AppStyleTheme _appStyle = AppStyleTheme.modern;
   bool _isInitialized = false;
   Uint8List? _savedPhotoBytes; // Foto profil dari Base64 SharedPreferences
-  String? _profileName;        // Nama yang disimpan lokal
+  String? _profileName; // Nama yang disimpan lokal
 
   @override
   void initState() {
@@ -59,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _dailyReminder = _settingsService.dailyReminder;
       _weeklyReminder = _settingsService.weeklyReminder;
+      _appStyle = _settingsService.appStyle;
       _savedPhotoBytes = photoBytes;
       _profileName = prefs.getString('profile_name');
       _isInitialized = true;
@@ -81,6 +85,90 @@ class _SettingsScreenState extends State<SettingsScreen> {
       Icons.person,
       color: Colors.white,
       size: size * 0.5,
+    );
+  }
+
+  void _showAppStylePicker() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+        decoration: BoxDecoration(
+          color: AppColors.bgCard,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border(top: BorderSide(color: AppColors.borderAccent)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Gaya Tampilan',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: 12),
+              ...AppStyleTheme.values.map((style) {
+                final isSelected = style == _appStyle;
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.blueAccent.withValues(alpha: 0.14)
+                          : AppColors.bgCardAlt,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.blueAccent
+                            : AppColors.borderAccent,
+                      ),
+                    ),
+                    child: Icon(
+                      style == AppStyleTheme.saweriaClassic
+                          ? Icons.volunteer_activism_outlined
+                          : Icons.auto_awesome_outlined,
+                      color: isSelected
+                          ? AppColors.blueAccent
+                          : AppColors.textMuted,
+                      size: 20,
+                    ),
+                  ),
+                  title: Text(
+                    style.label,
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                  subtitle: Text(
+                    style == AppStyleTheme.saweriaClassic
+                        ? 'Nuansa klasik hijau Saweria dengan kartu lebih solid.'
+                        : 'Tampilan bawaan aplikasi saat ini.',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  ),
+                  trailing: isSelected
+                      ? Icon(Icons.check_circle, color: AppColors.blueAccent)
+                      : null,
+                  onTap: () {
+                    setState(() => _appStyle = style);
+                    _settingsService.appStyle = style;
+                    appStyleNotifier.value = style;
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -119,6 +207,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               // Profile Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroPink,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -163,7 +253,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _profileName ?? _user?.displayName ?? 'Pengguna',
+                                _profileName ??
+                                    _user?.displayName ??
+                                    'Pengguna',
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
                               Text(
@@ -189,11 +281,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             );
                             if (changed == true) {
                               // Reload foto dan nama setelah kembali dari edit profile
-                              final prefs = await SharedPreferences.getInstance();
+                              final prefs =
+                                  await SharedPreferences.getInstance();
                               Uint8List? newBytes;
                               final b64 = prefs.getString(kLocalPhotoBase64Key);
                               if (b64 != null && b64.isNotEmpty) {
-                                try { newBytes = base64Decode(b64); } catch (_) {}
+                                try {
+                                  newBytes = base64Decode(b64);
+                                } catch (_) {}
                               }
                               if (!mounted) return;
                               setState(() {
@@ -216,6 +311,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Appearance Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroTeal,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -270,6 +367,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    _SettingsItem(
+                      icon: Icons.dashboard_customize_outlined,
+                      title: 'Gaya Tampilan',
+                      subtitle: _appStyle.label,
+                      onTap: _showAppStylePicker,
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.blueAccent.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.blueBorder),
+                        ),
+                        child: Text(
+                          _appStyle == AppStyleTheme.saweriaClassic
+                              ? 'Saweria'
+                              : 'Modern',
+                          style: TextStyle(
+                            color: AppColors.blueAccent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -277,6 +400,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Notifications Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroYellow,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -329,6 +454,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Security Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroBlue,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -364,6 +491,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Backup & Export Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroPink,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -406,6 +535,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Language Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroTeal,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -441,6 +572,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Support Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroYellow,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -476,6 +609,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Account Section
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroBlue,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -507,6 +642,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // App Info
               GlassContainer(
+                showRetroWindowBar: true,
+                retroWindowBarColor: AppColors.retroPink,
                 borderRadius: 16,
                 padding: const EdgeInsets.all(20),
                 child: Column(

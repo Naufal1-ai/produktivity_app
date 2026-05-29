@@ -60,6 +60,8 @@ class DashboardSummaryCards extends StatelessWidget {
   Widget _buildCard(
       String title, double amount, Color accentColor, IconData icon) {
     return GlassContainer(
+      showRetroWindowBar: true,
+      retroWindowBarColor: accentColor,
       padding: const EdgeInsets.all(20),
       borderRadius: 24,
       child: Column(

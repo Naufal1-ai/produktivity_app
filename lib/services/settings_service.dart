@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:productivity/core/theme/app_style_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
   static const String _languageKey = 'language';
+  static const String _appStyleKey = 'app_style';
   static const String _themeColorKey = 'theme_color';
   static const String _dailyReminderKey = 'daily_reminder';
   static const String _weeklyReminderKey = 'weekly_reminder';
@@ -17,6 +19,7 @@ class SettingsService {
   bool _initialized = false;
 
   late String _language;
+  late AppStyleTheme _appStyle;
   late int _themeColorValue;
   late bool _dailyReminder;
   late bool _weeklyReminder;
@@ -30,6 +33,10 @@ class SettingsService {
 
     _prefs = await SharedPreferences.getInstance();
     _language = _prefs.getString(_languageKey) ?? 'id';
+    _appStyle = AppStyleTheme.values.firstWhere(
+      (style) => style.name == _prefs.getString(_appStyleKey),
+      orElse: () => AppStyleTheme.modern,
+    );
     _themeColorValue = _prefs.getInt(_themeColorKey) ?? Colors.blue.toARGB32();
     _dailyReminder = _prefs.getBool(_dailyReminderKey) ?? false;
     _weeklyReminder = _prefs.getBool(_weeklyReminderKey) ?? false;
@@ -43,6 +50,13 @@ class SettingsService {
   set language(String value) {
     _language = value;
     _prefs.setString(_languageKey, value);
+  }
+
+  // App Style
+  AppStyleTheme get appStyle => _appStyle;
+  set appStyle(AppStyleTheme value) {
+    _appStyle = value;
+    _prefs.setString(_appStyleKey, value.name);
   }
 
   // Theme Color

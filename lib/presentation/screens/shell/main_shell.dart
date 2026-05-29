@@ -65,6 +65,15 @@ class _MainShellState extends State<MainShell> {
     final kanbanProvider = context.watch<KanbanBoardProvider>();
     final activeBoard = kanbanProvider.activeBoard;
     final isDark = widget.isDarkMode;
+    final shellGradient = AppColors.isSaweriaClassic
+        ? const [
+            AppColors.retroCream,
+            Color(0xFFFFE8C0),
+            Color(0xFFE3F4F2),
+          ]
+        : isDark
+            ? kBoardGradients[activeBoard?.colorIndex ?? 0]
+            : kBoardGradientsLight[activeBoard?.colorIndex ?? 0];
 
     final pages = [
       HomeScreen(
@@ -351,9 +360,10 @@ class _MainShellState extends State<MainShell> {
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: isDark
-                                ? kBoardGradients[activeBoard?.colorIndex ?? 0]
-                                : kBoardGradientsLight[activeBoard?.colorIndex ?? 0],
+                            colors: shellGradient,
+                            stops: AppColors.isSaweriaClassic
+                                ? const [0, 0.52, 1]
+                                : null,
                           ),
                         ),
                         child: GridBackground(
@@ -371,9 +381,10 @@ class _MainShellState extends State<MainShell> {
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: isDark
-                          ? kBoardGradients[activeBoard?.colorIndex ?? 0]
-                          : kBoardGradientsLight[activeBoard?.colorIndex ?? 0],
+                      colors: shellGradient,
+                      stops: AppColors.isSaweriaClassic
+                          ? const [0, 0.52, 1]
+                          : null,
                     ),
                   ),
                   child: GridBackground(
@@ -471,7 +482,12 @@ class _SideNavState extends State<_SideNav> {
       width: 80,
       decoration: BoxDecoration(
         color: AppColors.bgCardAlt,
-        border: Border(right: BorderSide(color: AppColors.border, width: 1)),
+        border: Border(
+          right: BorderSide(
+            color: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.border,
+            width: AppColors.isSaweriaClassic ? 2.5 : 1,
+          ),
+        ),
       ),
       child: Column(
         children: [
@@ -703,7 +719,7 @@ class _SideNavState extends State<_SideNav> {
                       _profilePhotoBytes!,
                       fit: BoxFit.cover,
                     )
-                  : Icon(
+                  : const Icon(
                       Icons.person,
                       color: Colors.white,
                       size: 22,
@@ -764,32 +780,49 @@ class _BottomNav extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius:
+                BorderRadius.circular(AppColors.isSaweriaClassic ? 10 : 32),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
+              if (AppColors.isSaweriaClassic)
+                BoxShadow(
+                  color: AppColors.retroInk.withValues(alpha: 0.82),
+                  blurRadius: 0,
+                  offset: const Offset(4, 4),
+                )
+              else
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(32),
+            borderRadius:
+                BorderRadius.circular(AppColors.isSaweriaClassic ? 10 : 32),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              filter: ImageFilter.blur(
+                sigmaX: AppColors.isSaweriaClassic ? 0 : 24,
+                sigmaY: AppColors.isSaweriaClassic ? 0 : 24,
+              ),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
-                  color: AppColors.isDark
-                      ? const Color(0xFF1E1E1E).withValues(alpha: 0.6)
-                      : Colors.white.withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(32),
+                  color: AppColors.isSaweriaClassic
+                      ? AppColors.retroPaper
+                      : AppColors.isDark
+                          ? const Color(0xFF1E1E1E).withValues(alpha: 0.6)
+                          : Colors.white.withValues(alpha: 0.7),
+                  borderRadius: BorderRadius.circular(
+                      AppColors.isSaweriaClassic ? 10 : 32),
                   border: Border.all(
-                    color: AppColors.isDark
-                        ? Colors.white.withValues(alpha: 0.1)
-                        : Colors.white.withValues(alpha: 0.5),
-                    width: 1,
+                    color: AppColors.isSaweriaClassic
+                        ? AppColors.retroInk
+                        : AppColors.isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.white.withValues(alpha: 0.5),
+                    width: AppColors.isSaweriaClassic ? 1.8 : 1,
                   ),
                 ),
                 child: SingleChildScrollView(
@@ -808,9 +841,19 @@ class _BottomNav extends StatelessWidget {
                               horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: isActive
-                                ? AppColors.blueMid.withValues(alpha: 0.15)
+                                ? AppColors.blueMid.withValues(
+                                    alpha:
+                                        AppColors.isSaweriaClassic ? 1 : 0.15,
+                                  )
                                 : Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(
+                                AppColors.isSaweriaClassic ? 8 : 20),
+                            border: AppColors.isSaweriaClassic && isActive
+                                ? Border.all(
+                                    color: AppColors.retroInk,
+                                    width: 1.4,
+                                  )
+                                : null,
                           ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
