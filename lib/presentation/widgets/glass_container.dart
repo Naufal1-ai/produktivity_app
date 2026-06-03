@@ -29,20 +29,26 @@ class GlassContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSaweriaClassic = AppColors.isSaweriaClassic;
-    final effectiveBlur = isSaweriaClassic ? 0.0 : blur;
+    // Disable blur on mobile platforms (Android/iOS) to ensure high performance on devices like Oppo A96
+    final isMobile = Theme.of(context).platform == TargetPlatform.android ||
+        Theme.of(context).platform == TargetPlatform.iOS;
+    final effectiveBlur = (isSaweriaClassic || isMobile) ? 0.0 : blur;
+
     final defaultColor = isSaweriaClassic
         ? AppColors.bgCard
-        : AppColors.isDark
-            ? Colors.white.withValues(alpha: 0.12)
-            : Colors.white.withValues(alpha: 0.65);
+        : isMobile
+            ? (AppColors.isDark ? AppColors.bgCard : Colors.white)
+            : AppColors.isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : Colors.white.withValues(alpha: 0.65);
 
     final defaultBorderWidth = isSaweriaClassic ? 2.5 : 1.0;
     final defaultBorder = Border.all(
       color: isSaweriaClassic
           ? AppColors.borderAccent
           : AppColors.isDark
-              ? Colors.white.withValues(alpha: 0.18)
-              : Colors.black.withValues(alpha: 0.10),
+              ? (isMobile ? AppColors.border : Colors.white.withValues(alpha: 0.18))
+              : (isMobile ? AppColors.border : Colors.black.withValues(alpha: 0.10)),
       width: defaultBorderWidth,
     );
 

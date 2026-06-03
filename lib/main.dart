@@ -21,7 +21,7 @@ import 'package:productivity/providers/notification_settings_provider.dart';
 import 'package:productivity/services/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:js' as js;
+import 'package:productivity/core/utils/web_helper.dart' as web_helper;
 
 // Satu sumber kebenaran untuk dark mode
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
@@ -61,11 +61,7 @@ void main() async {
 
   // Hapus splash screen HTML dari DOM pada Flutter Web
   if (kIsWeb) {
-    try {
-      js.context.callMethod('removeSplashFromWeb');
-    } catch (e) {
-      debugPrint("Gagal menghapus splash screen web: $e");
-    }
+    web_helper.removeSplash();
   }
 }
 

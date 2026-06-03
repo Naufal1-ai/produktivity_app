@@ -24,7 +24,9 @@ class GridBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final isMobile = MediaQuery.sizeOf(context).width < 600 ||
+        Theme.of(context).platform == TargetPlatform.android ||
+        Theme.of(context).platform == TargetPlatform.iOS;
     // If already inside a GridBackground, just render child to avoid duplicating orbs
     final alreadyInScope = _GridBackgroundScope.isInScope(context);
     final isSaweriaClassic = AppColors.isSaweriaClassic;
@@ -48,11 +50,12 @@ class GridBackground extends StatelessWidget {
                 painter: _RetroDotPainter(
                   dotColor: AppColors.border.withValues(alpha: 0.12),
                   ringColor: AppColors.retroTeal.withValues(alpha: 0.18),
+                  isMobile: isMobile,
                 ),
               ),
             ),
           // iOS style ambient colorful orbs
-          if (!isSaweriaClassic) ...[
+          if (!isSaweriaClassic && !isMobile) ...[
             Positioned(
               top: -100,
               left: -100,
@@ -122,8 +125,13 @@ class GridBackground extends StatelessWidget {
 class _RetroDotPainter extends CustomPainter {
   final Color dotColor;
   final Color ringColor; // kept for compatibility if passed, though unused now
+  final bool isMobile;
 
-  _RetroDotPainter({required this.dotColor, required this.ringColor});
+  _RetroDotPainter({
+    required this.dotColor,
+    required this.ringColor,
+    required this.isMobile,
+  });
 
   void _drawStar(Canvas canvas, Offset center, double radius, Paint paint) {
     int points = 5;
@@ -155,14 +163,20 @@ class _RetroDotPainter extends CustomPainter {
 
     for (double y = 16; y < size.height; y += spacing) {
       for (double x = 16; x < size.width; x += spacing) {
-        // Draw a small star pattern
-        _drawStar(canvas, Offset(x, y), 3.5, dotPaint);
+        if (isMobile) {
+          // Draw a simple circle dot, 100x faster than _drawStar path calculation
+          canvas.drawCircle(Offset(x, y), 1.5, dotPaint);
+        } else {
+          // Draw a small star pattern
+          _drawStar(canvas, Offset(x, y), 3.5, dotPaint);
+        }
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _RetroDotPainter oldDelegate) =>
+      oldDelegate.dotColor != dotColor || oldDelegate.isMobile != isMobile;
 }
 
 class _GridPainter extends CustomPainter {

@@ -273,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         clipBehavior: Clip.antiAlias,
                                         child: _profilePhotoBytes != null
                                             ? Image.memory(_profilePhotoBytes!, fit: BoxFit.cover)
-                                            : Icon(Icons.person, color: Colors.white, size: 20),
+                                            : const Icon(Icons.person, color: Colors.white, size: 20),
                                       ),
                                     ),
                                   ],
@@ -316,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         clipBehavior: Clip.antiAlias,
                                         child: _profilePhotoBytes != null
                                             ? Image.memory(_profilePhotoBytes!, fit: BoxFit.cover)
-                                            : Icon(Icons.person, color: Colors.white, size: 24),
+                                            : const Icon(Icons.person, color: Colors.white, size: 24),
                                       ),
                                     ),
                                   ],

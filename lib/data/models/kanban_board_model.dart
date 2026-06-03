@@ -1,3 +1,4 @@
+import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 const kKanbanColumns = [
@@ -178,7 +179,7 @@ class KanbanCard {
             }
           }
         } catch (e) {
-          print("Error parsing individual checklist item: $e");
+          developer.log("Error parsing individual checklist item: $e", name: "KanbanCard");
         }
       }
 
@@ -208,8 +209,7 @@ class KanbanCard {
         members: List<String>.from(data['members'] as List? ?? const <String>[]),
       );
     } catch (e, stack) {
-      print("ERROR PARSING CARD ${doc.id}: $e");
-      print(stack.toString());
+      developer.log("ERROR PARSING CARD ${doc.id}", error: e, stackTrace: stack, name: "KanbanCard");
       return KanbanCard(
         id: doc.id,
         title: 'Gagal Memuat Kartu',

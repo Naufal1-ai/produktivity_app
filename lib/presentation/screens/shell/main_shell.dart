@@ -21,7 +21,7 @@ import 'package:productivity/presentation/screens/vehicle_service/vehicle_servic
 import 'package:productivity/presentation/widgets/grid_background.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:js' as js;
+import 'package:productivity/core/utils/web_helper.dart' as web_helper;
 
 /// Shell utama yang meng-host BottomNavigationBar + 5 tab
 class MainShell extends StatefulWidget {
@@ -51,9 +51,7 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     if (kIsWeb) {
-      try {
-        js.context.callMethod('removeSplashFromWeb');
-      } catch (_) {}
+      web_helper.removeSplash();
     }
   }
 
@@ -336,7 +334,7 @@ class _MainShellState extends State<MainShell> {
                           Column(
                             children: [
                               Text(
-                                'v2.4.1',
+                                'v2.5.1',
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 11,

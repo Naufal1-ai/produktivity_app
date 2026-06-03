@@ -11,6 +11,12 @@ class NotificationSettingsProvider extends ChangeNotifier {
   bool _serviceReminderEnabled = false;
   bool _permissionGranted = false;
 
+  // Cache to prevent redundant notification IPC calls
+  String? _lastShownTitle;
+  String? _lastShownBody;
+  String? _lastShownSubText;
+  bool _lastShownWasOngoing = false;
+
   bool get serviceReminderEnabled => _serviceReminderEnabled;
   bool get permissionGranted => _permissionGranted;
 
@@ -50,6 +56,10 @@ class NotificationSettingsProvider extends ChangeNotifier {
     if (enabled && services != null && services.isNotEmpty) {
       await _showNotification(services.first);
     } else {
+      _lastShownWasOngoing = false;
+      _lastShownTitle = null;
+      _lastShownBody = null;
+      _lastShownSubText = null;
       await NotificationService().cancelOngoingService();
     }
 
@@ -60,7 +70,13 @@ class NotificationSettingsProvider extends ChangeNotifier {
   Future<void> updateServiceReminder(List<VehicleServiceModel> services) async {
     if (!_serviceReminderEnabled) return;
     if (services.isEmpty) {
-      await NotificationService().cancelOngoingService();
+      if (_lastShownWasOngoing) {
+        _lastShownWasOngoing = false;
+        _lastShownTitle = null;
+        _lastShownBody = null;
+        _lastShownSubText = null;
+        await NotificationService().cancelOngoingService();
+      }
       return;
     }
     await _showNotification(services.first);
@@ -93,8 +109,23 @@ class NotificationSettingsProvider extends ChangeNotifier {
       }
     }
 
+    final title = '🏍️ CB150R — ${latest.title}';
+
+    // OPTIMASI: Cegah IPC notifikasi yang tidak perlu jika konten tidak berubah
+    if (_lastShownWasOngoing &&
+        _lastShownTitle == title &&
+        _lastShownBody == body &&
+        _lastShownSubText == subText) {
+      return;
+    }
+
+    _lastShownTitle = title;
+    _lastShownBody = body;
+    _lastShownSubText = subText;
+    _lastShownWasOngoing = true;
+
     await NotificationService().showOngoingServiceReminder(
-      title: '🏍️ CB150R — ${latest.title}',
+      title: title,
       body: body,
       subText: subText,
     );
