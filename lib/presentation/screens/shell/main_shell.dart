@@ -20,6 +20,8 @@ import 'package:productivity/presentation/screens/lending/lending_screen.dart';
 import 'package:productivity/presentation/screens/vehicle_service/vehicle_service_screen.dart';
 import 'package:productivity/presentation/widgets/grid_background.dart';
 import 'package:productivity/providers/kanban_board_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:js' as js;
 
 /// Shell utama yang meng-host BottomNavigationBar + 5 tab
 class MainShell extends StatefulWidget {
@@ -45,6 +47,16 @@ class _MainShellState extends State<MainShell> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    if (kIsWeb) {
+      try {
+        js.context.callMethod('removeSplashFromWeb');
+      } catch (_) {}
+    }
+  }
+
   void _openAddForm() {
     showModalBottomSheet(
       context: context,
@@ -66,11 +78,17 @@ class _MainShellState extends State<MainShell> {
     final activeBoard = kanbanProvider.activeBoard;
     final isDark = widget.isDarkMode;
     final shellGradient = AppColors.isSaweriaClassic
-        ? const [
-            AppColors.retroCream,
-            Color(0xFFFFE8C0),
-            Color(0xFFE3F4F2),
-          ]
+        ? (isDark
+            ? const [
+                Color(0xFF181716),
+                Color(0xFF251E17),
+                Color(0xFF12221F),
+              ]
+            : const [
+                AppColors.retroCream,
+                Color(0xFFFFE8C0),
+                Color(0xFFE3F4F2),
+              ])
         : isDark
             ? kBoardGradients[activeBoard?.colorIndex ?? 0]
             : kBoardGradientsLight[activeBoard?.colorIndex ?? 0];
@@ -484,7 +502,7 @@ class _SideNavState extends State<_SideNav> {
         color: AppColors.bgCardAlt,
         border: Border(
           right: BorderSide(
-            color: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.border,
+            color: AppColors.border,
             width: AppColors.isSaweriaClassic ? 2.5 : 1,
           ),
         ),
@@ -785,7 +803,7 @@ class _BottomNav extends StatelessWidget {
             boxShadow: [
               if (AppColors.isSaweriaClassic)
                 BoxShadow(
-                  color: AppColors.retroInk.withValues(alpha: 0.82),
+                  color: (AppColors.isDark ? Colors.black : AppColors.retroInk).withValues(alpha: 0.82),
                   blurRadius: 0,
                   offset: const Offset(4, 4),
                 )
@@ -810,7 +828,7 @@ class _BottomNav extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 decoration: BoxDecoration(
                   color: AppColors.isSaweriaClassic
-                      ? AppColors.retroPaper
+                      ? AppColors.bgCard
                       : AppColors.isDark
                           ? const Color(0xFF1E1E1E).withValues(alpha: 0.6)
                           : Colors.white.withValues(alpha: 0.7),
@@ -818,7 +836,7 @@ class _BottomNav extends StatelessWidget {
                       AppColors.isSaweriaClassic ? 10 : 32),
                   border: Border.all(
                     color: AppColors.isSaweriaClassic
-                        ? AppColors.retroInk
+                        ? AppColors.border
                         : AppColors.isDark
                             ? Colors.white.withValues(alpha: 0.1)
                             : Colors.white.withValues(alpha: 0.5),
@@ -850,7 +868,7 @@ class _BottomNav extends StatelessWidget {
                                 AppColors.isSaweriaClassic ? 8 : 20),
                             border: AppColors.isSaweriaClassic && isActive
                                 ? Border.all(
-                                    color: AppColors.retroInk,
+                                    color: AppColors.border,
                                     width: 1.4,
                                   )
                                 : null,

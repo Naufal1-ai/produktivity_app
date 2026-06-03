@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadProfileData();
     _loadCardOrder();
-    _transactionStream = _repo.watchByMonth(_selectedMonth);
+    _transactionStream = _repo.watchAll();
     _lendingStream = _lendingRepo.watchAll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<KanbanBoardProvider>().initialize();
@@ -178,14 +178,24 @@ class _HomeScreenState extends State<HomeScreen> {
           child: StreamBuilder<List<TransactionModel>>(
             stream: _transactionStream,
             builder: (context, snapshot) {
-              final txList = snapshot.data ?? [];
+              final allTxs = snapshot.data ?? [];
+              
+              // Calculate all-time balance (does not reset by month)
+              final allTimeBalance = allTxs.fold(0.0, (s, t) => s + (t.isIncome ? t.amount : -t.amount));
+
+              // Filter transactions to show only the selected month's history and charts
+              final txList = allTxs.where((t) {
+                return t.date.year == _selectedMonth.year &&
+                    t.date.month == _selectedMonth.month;
+              }).toList();
+
               final totalIncome = txList
                   .where((t) => t.isIncome)
                   .fold(0.0, (s, t) => s + t.amount);
               final totalExpense = txList
                   .where((t) => !t.isIncome)
                   .fold(0.0, (s, t) => s + t.amount);
-              final balance = totalIncome - totalExpense;
+              final balance = allTimeBalance;
 
               return LayoutBuilder(
                 builder: (context, constraints) {
@@ -348,6 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           balance: balance,
                                           totalIncome: totalIncome,
                                           totalExpense: totalExpense,
+                                          transactions: allTxs,
                                           isDesktop: isDesktop,
                                         ),
                                         'kanban': _buildKanbanOverview(context),

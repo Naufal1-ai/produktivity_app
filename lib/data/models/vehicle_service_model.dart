@@ -1,5 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+class VehiclePart {
+  final String name;
+  final String brand;
+  final double price;
+  final String code;
+  final String imageUrl;
+
+  VehiclePart({
+    required this.name,
+    this.brand = '',
+    this.price = 0.0,
+    this.code = '',
+    this.imageUrl = '',
+  });
+
+  factory VehiclePart.fromMap(Map<String, dynamic> map) {
+    return VehiclePart(
+      name: map['name'] as String? ?? '',
+      brand: map['brand'] as String? ?? '',
+      price: (map['price'] as num?)?.toDouble() ?? 0.0,
+      code: map['code'] as String? ?? '',
+      imageUrl: map['imageUrl'] as String? ?? map['image'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() => {
+        'name': name,
+        'brand': brand,
+        'price': price,
+        'code': code,
+        'imageUrl': imageUrl,
+      };
+}
+
 class VehicleServiceModel {
   final String id;
   final String title;
@@ -11,6 +45,7 @@ class VehicleServiceModel {
   final int? nextServiceOdometer;
   final DateTime createdAt;
   final String? imageUrl;
+  final List<VehiclePart> parts;
 
   VehicleServiceModel({
     required this.id,
@@ -23,6 +58,7 @@ class VehicleServiceModel {
     this.nextServiceOdometer,
     required this.createdAt,
     this.imageUrl,
+    this.parts = const [],
   });
 
   factory VehicleServiceModel.fromDoc(DocumentSnapshot doc) {
@@ -42,6 +78,11 @@ class VehicleServiceModel {
           ? (data['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
       imageUrl: data['imageUrl'] as String?,
+      parts: data['parts'] != null
+          ? (data['parts'] as List)
+              .map((p) => VehiclePart.fromMap(Map<String, dynamic>.from(p)))
+              .toList()
+          : const [],
     );
   }
 
@@ -51,11 +92,13 @@ class VehicleServiceModel {
         'date': Timestamp.fromDate(date),
         'cost': cost,
         'odometer': odometer,
-        'nextServiceDate':
-            nextServiceDate != null ? Timestamp.fromDate(nextServiceDate!) : null,
+        'nextServiceDate': nextServiceDate != null
+            ? Timestamp.fromDate(nextServiceDate!)
+            : null,
         'nextServiceOdometer': nextServiceOdometer,
         'createdAt': FieldValue.serverTimestamp(),
         'imageUrl': imageUrl,
+        'parts': parts.map((p) => p.toMap()).toList(),
       };
 
   VehicleServiceModel copyWith({
@@ -67,6 +110,7 @@ class VehicleServiceModel {
     DateTime? nextServiceDate,
     int? nextServiceOdometer,
     String? imageUrl,
+    List<VehiclePart>? parts,
   }) =>
       VehicleServiceModel(
         id: id,
@@ -79,5 +123,6 @@ class VehicleServiceModel {
         nextServiceOdometer: nextServiceOdometer ?? this.nextServiceOdometer,
         createdAt: createdAt,
         imageUrl: imageUrl ?? this.imageUrl,
+        parts: parts ?? this.parts,
       );
 }

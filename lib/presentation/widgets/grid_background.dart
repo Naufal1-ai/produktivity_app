@@ -46,7 +46,7 @@ class GridBackground extends StatelessWidget {
             Positioned.fill(
               child: CustomPaint(
                 painter: _RetroDotPainter(
-                  dotColor: AppColors.retroInk.withValues(alpha: 0.12),
+                  dotColor: AppColors.border.withValues(alpha: 0.12),
                   ringColor: AppColors.retroTeal.withValues(alpha: 0.18),
                 ),
               ),

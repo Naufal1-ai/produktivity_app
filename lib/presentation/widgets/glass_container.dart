@@ -28,22 +28,21 @@ class GlassContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.sizeOf(context).width < 600;
     final isSaweriaClassic = AppColors.isSaweriaClassic;
-    final effectiveBlur = isMobile || isSaweriaClassic ? 0.0 : blur;
+    final effectiveBlur = isSaweriaClassic ? 0.0 : blur;
     final defaultColor = isSaweriaClassic
         ? AppColors.bgCard
         : AppColors.isDark
-            ? Colors.white.withValues(alpha: isMobile ? 0.08 : 0.06)
-            : (isMobile ? Colors.white : Colors.white.withValues(alpha: 0.85));
+            ? Colors.white.withValues(alpha: 0.12)
+            : Colors.white.withValues(alpha: 0.65);
 
     final defaultBorderWidth = isSaweriaClassic ? 2.5 : 1.0;
     final defaultBorder = Border.all(
       color: isSaweriaClassic
           ? AppColors.borderAccent
           : AppColors.isDark
-              ? Colors.white.withValues(alpha: 0.1)
-              : Colors.black.withValues(alpha: 0.05),
+              ? Colors.white.withValues(alpha: 0.18)
+              : Colors.black.withValues(alpha: 0.10),
       width: defaultBorderWidth,
     );
 
@@ -54,7 +53,7 @@ class GlassContainer extends StatelessWidget {
         boxShadow: [
           if (isSaweriaClassic)
             BoxShadow(
-              color: AppColors.retroInk, // Solid hard shadow
+              color: AppColors.isDark ? Colors.black : AppColors.retroInk, // Solid hard shadow
               blurRadius: 0,
               offset: const Offset(6, 6), // Classic retro offset thicker
             )
@@ -146,7 +145,7 @@ class GlassContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.retroInk, width: 1.5),
+        border: Border.all(color: AppColors.border, width: 1.5),
       ),
     );
   }

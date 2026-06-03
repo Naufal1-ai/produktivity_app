@@ -26,21 +26,21 @@ class AppColors {
   // Warna bg kini diselaraskan dengan gradient Kanban agar semua tab terlihat konsisten
   static Color get bg {
     if (isSaweriaClassic) {
-      return retroCream;
+      return isDark ? const Color(0xFF161514) : retroCream;
     }
     return isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9);
   }
 
   static Color get bgCard {
     if (isSaweriaClassic) {
-      return retroPaper;
+      return isDark ? const Color(0xFF242220) : retroPaper;
     }
     return isDark ? const Color(0xFF1E293B) : Colors.white;
   }
 
   static Color get bgCardAlt {
     if (isSaweriaClassic) {
-      return const Color(0xFFFFE2B5);
+      return isDark ? const Color(0xFF352F28) : const Color(0xFFFFE2B5);
     }
     return isDark ? const Color(0xFF1A2332) : const Color(0xFFE8EDF5);
   }
@@ -48,15 +48,15 @@ class AppColors {
   // Brand accent. Keep the old names so existing UI code follows the selected theme color.
   static Color get _activeBrand => isSaweriaClassic ? retroTeal : brand;
   static Color get blueDark => isSaweriaClassic
-      ? const Color(0xFF27837E)
+      ? (isDark ? const Color(0xFF5CCAB4) : const Color(0xFF27837E))
       : _shiftLightness(_activeBrand, -0.34);
   static Color get blueMid =>
       isSaweriaClassic ? retroYellow : _shiftLightness(_activeBrand, -0.08);
   static Color get blueBorder =>
-      isSaweriaClassic ? retroInk : _shiftLightness(_activeBrand, 0.02);
+      isSaweriaClassic ? (isDark ? retroTeal : retroInk) : _shiftLightness(_activeBrand, 0.02);
   static Color get blueAccent => _activeBrand;
   static Color get blueText =>
-      isSaweriaClassic ? retroInk : _shiftLightness(_activeBrand, 0.24);
+      isSaweriaClassic ? (isDark ? retroPaper : retroInk) : _shiftLightness(_activeBrand, 0.24);
   static Color get blueMuted =>
       isSaweriaClassic ? retroBlue : _shiftLightness(_activeBrand, 0.14);
   static Color get primaryWeb => _activeBrand;
@@ -64,28 +64,28 @@ class AppColors {
   // Text
   static Color get textPrimary {
     if (isSaweriaClassic) {
-      return retroInk;
+      return isDark ? retroPaper : retroInk;
     }
     return isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
   }
 
   static Color get textSecondary {
     if (isSaweriaClassic) {
-      return const Color(0xFF5F5549);
+      return isDark ? const Color(0xFFC5BCB1) : const Color(0xFF5F5549);
     }
     return isDark ? const Color(0xFFA6ABB4) : const Color(0xFF334155);
   }
 
   static Color get textMuted {
     if (isSaweriaClassic) {
-      return const Color(0xFF7C7165);
+      return isDark ? const Color(0xFF9E9385) : const Color(0xFF7C7165);
     }
     return isDark ? const Color(0xFF6B7280) : const Color(0xFF64748B);
   }
 
   static Color get textDim {
     if (isSaweriaClassic) {
-      return const Color(0xFFA99E92);
+      return isDark ? const Color(0xFF7A6F62) : const Color(0xFFA99E92);
     }
     return isDark ? const Color(0xFF4B5563) : const Color(0xFF94A3B8);
   }
@@ -97,14 +97,14 @@ class AppColors {
   static const purple = Color(0xFF8B5CF6);
   static Color get border {
     if (isSaweriaClassic) {
-      return retroInk;
+      return isDark ? retroCream : retroInk;
     }
     return isDark ? const Color(0xFF1E2130) : const Color(0xFFE2E8F0);
   }
 
   static Color get borderAccent {
     if (isSaweriaClassic) {
-      return retroInk;
+      return isDark ? retroCream : retroInk;
     }
     return isDark ? const Color(0xFF2A2D3E) : const Color(0xFFCBD5E1);
   }
@@ -149,13 +149,13 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.blueMid,
-          foregroundColor: AppColors.blueText,
+          foregroundColor: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.blueText,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 14),
             side: BorderSide(
-              color: AppColors.blueBorder,
+              color: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.blueBorder,
               width: AppColors.isSaweriaClassic ? 2.5 : 1,
             ),
           ),
@@ -275,13 +275,13 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.blueMid,
-          foregroundColor: AppColors.blueText,
+          foregroundColor: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.blueText,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius:
                 BorderRadius.circular(AppColors.isSaweriaClassic ? 50 : 14),
             side: BorderSide(
-              color: AppColors.blueBorder,
+              color: AppColors.isSaweriaClassic ? AppColors.retroInk : AppColors.blueBorder,
               width: AppColors.isSaweriaClassic ? 2.5 : 1,
             ),
           ),

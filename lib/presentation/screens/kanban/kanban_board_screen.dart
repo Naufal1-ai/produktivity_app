@@ -65,15 +65,26 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
     final isWideScreen = MediaQuery.of(context).size.width > 700;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final isNarrow = MediaQuery.of(context).size.width < 600;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: SafeArea(
         bottom: false,
-        child: Column(
+        child: Padding(
+          padding: isNarrow
+              ? const EdgeInsets.fromLTRB(10, 8, 10, 100)
+              : const EdgeInsets.fromLTRB(16, 12, 16, 110),
+          child: GlassContainer(
+            padding: isNarrow
+                ? const EdgeInsets.symmetric(horizontal: 12, vertical: 14)
+                : const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+            borderRadius: 28,
+            child: Column(
               children: [
                 // Header Papan
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
                   child: Row(
                     children: [
                       GestureDetector(
@@ -154,7 +165,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
 
                 // Progress Bar
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
                   child: Builder(
                     builder: (context) {
                       final total = provider.getTotalCards();
@@ -210,6 +221,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                     },
                   ),
                 ),
+                const Divider(height: 24, thickness: 1),
 
                 // Kolom Kanban Viewport
                 Expanded(
@@ -222,6 +234,8 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
               ],
             ),
           ),
+        ),
+      ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 100),
         child: FloatingActionButton(
@@ -241,7 +255,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   Widget _buildColumnsHorizontalList(KanbanBoardProvider provider, List<String> columns, BoardModel board) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
       itemCount: columns.length + 1,
       itemBuilder: (context, index) {
         if (index == columns.length) {
@@ -252,10 +266,15 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             alignment: Alignment.topCenter,
             child: GestureDetector(
               onTap: () => _openAddColumnDialog(context, board, provider),
-              child: GlassContainer(
+              child: Container(
                 padding: const EdgeInsets.all(20),
-                borderRadius: 24,
-                color: Colors.white.withValues(alpha: 0.08),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -292,7 +311,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
   Widget _buildColumnsVerticalList(KanbanBoardProvider provider, List<String> columns, BoardModel board) {
     return ListView.builder(
       scrollDirection: Axis.vertical,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+      padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
       itemCount: columns.length + 1,
       itemBuilder: (context, index) {
         if (index == columns.length) {
@@ -301,10 +320,15 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
             padding: const EdgeInsets.only(bottom: 16.0),
             child: GestureDetector(
               onTap: () => _openAddColumnDialog(context, board, provider),
-              child: GlassContainer(
+              child: Container(
                 padding: const EdgeInsets.all(20),
-                borderRadius: 24,
-                color: Colors.white.withValues(alpha: 0.08),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -379,12 +403,17 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                 ? Border.all(color: isDark ? Colors.white : Colors.black87, width: 2)
                 : null,
           ),
-          child: GlassContainer(
+          child: Container(
             padding: const EdgeInsets.all(14),
-            borderRadius: 24,
-            color: isDark
-                ? (isHovered ? Colors.white.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.06))
-                : (isHovered ? Colors.black.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04)),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? (isHovered ? Colors.white.withValues(alpha: 0.12) : Colors.white.withValues(alpha: 0.06))
+                  : (isHovered ? Colors.black.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.04)),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+              ),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -598,8 +627,13 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
+        color: isDragging
+            ? (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.white)
+            : (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.white),
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
         boxShadow: isDark
             ? null
             : [
@@ -610,14 +644,6 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
                 ),
               ],
       ),
-      child: GlassContainer(
-        padding: const EdgeInsets.all(12),
-        borderRadius: 16,
-        blur: 16,
-        color: isDragging
-            ? (isDark ? Colors.white.withValues(alpha: 0.2) : Colors.white)
-            : (isDark ? Colors.white.withValues(alpha: 0.12) : Colors.white),
-        border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -827,7 +853,7 @@ class _KanbanBoardScreenState extends State<KanbanBoardScreen> {
           ],
         ],
       ),
-    ),);
+    );
   }
 
   void _deleteCard(String cardId) {

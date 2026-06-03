@@ -17,8 +17,11 @@ import 'package:productivity/providers/kanban_board_provider.dart';
 import 'package:productivity/providers/pomodoro_provider.dart';
 import 'package:productivity/providers/habit_tracker_provider.dart';
 import 'package:productivity/providers/vehicle_service_provider.dart';
+import 'package:productivity/providers/notification_settings_provider.dart';
 import 'package:productivity/services/notification_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:js' as js;
 
 // Satu sumber kebenaran untuk dark mode
 final themeNotifier = ValueNotifier<ThemeMode>(ThemeMode.dark);
@@ -55,6 +58,15 @@ void main() async {
   }
 
   runApp(MyApp(settingsService: settingsService));
+
+  // Hapus splash screen HTML dari DOM pada Flutter Web
+  if (kIsWeb) {
+    try {
+      js.context.callMethod('removeSplashFromWeb');
+    } catch (e) {
+      debugPrint("Gagal menghapus splash screen web: $e");
+    }
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -80,6 +92,9 @@ class MyApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => VehicleServiceProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationSettingsProvider(),
         ),
       ],
       child: ValueListenableBuilder<ThemeMode>(
