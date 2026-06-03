@@ -13,6 +13,7 @@ import 'package:productivity/presentation/screens/home/home_screen.dart';
 import 'package:productivity/presentation/screens/settings/settings_screen.dart';
 import 'package:productivity/presentation/screens/tasks/tasks_screen.dart';
 import 'package:productivity/presentation/screens/kanban/kanban_board_screen.dart';
+import 'package:productivity/presentation/screens/calendar/calendar_screen.dart';
 import 'package:productivity/presentation/screens/pomodoro/pomodoro_timer_screen.dart';
 import 'package:productivity/presentation/screens/habit_tracker/habit_tracker_screen.dart';
 import 'package:productivity/presentation/widgets/transaction_form_sheet.dart';
@@ -108,6 +109,7 @@ class _MainShellState extends State<MainShell> {
         onToggleTheme: widget.onToggleTheme,
         isDarkMode: widget.isDarkMode,
       ),
+      const CalendarScreen(),
     ];
 
     return LayoutBuilder(
@@ -209,6 +211,15 @@ class _MainShellState extends State<MainShell> {
                             onTap: () {
                               Navigator.pop(context);
                               setState(() => _currentIndex = 2);
+                            },
+                          ),
+                          _DrawerItem(
+                            icon: Icons.calendar_month_outlined,
+                            title: 'Kalender Tersinkron',
+                            isActive: _currentIndex == 9,
+                            onTap: () {
+                              Navigator.pop(context);
+                              setState(() => _currentIndex = 9);
                             },
                           ),
                           _DrawerItem(
@@ -334,7 +345,7 @@ class _MainShellState extends State<MainShell> {
                           Column(
                             children: [
                               Text(
-                                'v2.5.1',
+                                'v2.6.0',
                                 style: TextStyle(
                                   color: AppColors.textDim,
                                   fontSize: 11,
@@ -700,6 +711,34 @@ class _SideNavState extends State<_SideNav> {
                   child: Icon(
                     Icons.two_wheeler_outlined,
                     color: currentIndex == 7
+                        ? AppColors.primaryWeb
+                        : AppColors.textDim,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Kalender
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Tooltip(
+              message: 'Kalender Tersinkron',
+              child: GestureDetector(
+                onTap: () => onTap(9),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: currentIndex == 9
+                        ? AppColors.primaryWeb.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    Icons.calendar_month_outlined,
+                    color: currentIndex == 9
                         ? AppColors.primaryWeb
                         : AppColors.textDim,
                     size: 24,

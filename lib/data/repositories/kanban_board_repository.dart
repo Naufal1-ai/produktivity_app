@@ -114,4 +114,13 @@ class KanbanBoardRepository {
   Future<void> delete(String id) async {
     await _col?.doc(id).delete();
   }
+
+  /// Mendapatkan semua kartu Kanban secara global tanpa filter boardId (untuk kalender)
+  Stream<List<KanbanCard>> watchAllCardsGlobal() {
+    final col = _col;
+    if (col == null) return Stream.value([]);
+    return col.snapshots().map((snap) {
+      return snap.docs.map(KanbanCard.fromDoc).toList();
+    });
+  }
 }
