@@ -13,10 +13,12 @@ class NotificationService {
   // Notification IDs
   static const int _ongoingServiceId = 1001;
   static const int _lendingReminderId = 1002;
+  static const int _ongoingTaskId = 1003;
 
   // Channel IDs
   static const String _ongoingChannelId = 'ongoing_service_channel';
   static const String _lendingChannelId = 'lending_channel_id';
+  static const String _ongoingTaskChannelId = 'ongoing_task_channel';
 
   // ── Init ─────────────────────────────────────────────────────────────────────
   Future<void> init() async {
@@ -99,6 +101,20 @@ class NotificationService {
         playSound: true,
       ),
     );
+
+    // Ongoing/persistent task channel
+    android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        _ongoingTaskChannelId,
+        'Pengingat Task & Jadwal',
+        description:
+            'Notifikasi terkunci yang menampilkan tugas dan jadwal aktif.',
+        importance: Importance.high,
+        playSound: false,
+        enableVibration: false,
+        showBadge: true,
+      ),
+    );
   }
 
   // ── Ongoing / Persistent Notification ────────────────────────────────────────
@@ -170,6 +186,75 @@ class NotificationService {
   Future<void> cancelOngoingService() async {
     if (!_isMobile) return;
     await _plugin.cancel(_ongoingServiceId);
+  }
+
+  // ── Ongoing Task Reminder ───────────────────────────────────────────────────
+  /// Menampilkan notifikasi **terkunci** untuk Task & Jadwal.
+  Future<void> showOngoingTaskReminder({
+    required String title,
+    required String body,
+    String? subText,
+  }) async {
+    if (!_isMobile) return;
+
+    final androidDetails = AndroidNotificationDetails(
+      _ongoingTaskChannelId,
+      'Pengingat Task & Jadwal',
+      channelDescription: 'Notifikasi status task dan jadwal terkunci.',
+      importance: Importance.high,
+      priority: Priority.high,
+
+      // === KUNCI UTAMA: ongoing = true → tidak bisa di-swipe ===
+      ongoing: true,
+      autoCancel: false,
+
+      fullScreenIntent: false,
+      playSound: false,
+      enableVibration: false,
+
+      // Styling notifikasi
+      styleInformation: BigTextStyleInformation(
+        body,
+        summaryText: subText ?? 'Tap untuk buka aplikasi',
+        contentTitle: title,
+        htmlFormatBigText: false,
+        htmlFormatContentTitle: false,
+        htmlFormatSummaryText: false,
+      ),
+
+      // Icon & warna
+      color: const Color(0xFF4F46E5), // Indigo matching modern app theme
+      icon: '@mipmap/ic_launcher',
+
+      // Kategori
+      category: AndroidNotificationCategory.status,
+
+      // Visibility: tampil di lockscreen
+      visibility: NotificationVisibility.public,
+
+      subText: subText,
+      showWhen: false,
+      usesChronometer: false,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: false,
+    );
+
+    final details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _plugin.show(_ongoingTaskId, title, body, details);
+  }
+
+  /// Menghapus notifikasi ongoing task (hanya bisa dari kode, bukan user)
+  Future<void> cancelOngoingTask() async {
+    if (!_isMobile) return;
+    await _plugin.cancel(_ongoingTaskId);
   }
 
   // ── Lending Reminder ─────────────────────────────────────────────────────────

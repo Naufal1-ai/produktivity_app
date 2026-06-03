@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:productivity/core/theme/app_theme.dart';
 import 'package:productivity/data/repositories/task_repository.dart';
 import 'package:productivity/data/models/task_model.dart';
 import 'package:productivity/presentation/widgets/task_form_sheet.dart';
 import 'package:productivity/presentation/widgets/grid_background.dart';
+import 'package:productivity/presentation/widgets/glass_container.dart';
+import 'package:productivity/providers/notification_settings_provider.dart';
 import 'package:productivity/core/utils/currency_utils.dart';
 
 class TasksScreen extends StatefulWidget {
@@ -204,6 +207,15 @@ class _TasksScreenState extends State<TasksScreen> {
                     final overdueCount =
                         tasks.where((task) => task.isOverdue).length;
 
+                    // Trigger notification update setiap kali data task berubah
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (context.mounted) {
+                        context
+                            .read<NotificationSettingsProvider>()
+                            .updateTaskReminder(tasks);
+                      }
+                    });
+
                     return Column(
                       children: [
                         // ✅ Stats row
@@ -232,6 +244,14 @@ class _TasksScreenState extends State<TasksScreen> {
                             ],
                           ),
                         ),
+
+                        // ✅ Toggle Notifikasi Terkunci
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 4),
+                          child: _TaskNotificationToggleCard(tasks: tasks),
+                        ),
+                        const SizedBox(height: 8),
 
                         Expanded(
                           child: filteredTasks.isEmpty
@@ -459,6 +479,83 @@ class _TaskCard extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+// ── Toggle Notifikasi Terkunci untuk Task & Jadwal ──────────────────────────
+class _TaskNotificationToggleCard extends StatelessWidget {
+  final List<TaskModel> tasks;
+
+  const _TaskNotificationToggleCard({required this.tasks});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<NotificationSettingsProvider>(
+      builder: (context, settingsProvider, child) {
+        final isEnabled = settingsProvider.taskReminderEnabled;
+        return GlassContainer(
+          borderRadius: 16,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: (isEnabled ? AppColors.blueAccent : AppColors.textDim)
+                      .withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  isEnabled
+                      ? Icons.notifications_active_rounded
+                      : Icons.notifications_off_rounded,
+                  color: isEnabled ? AppColors.blueAccent : AppColors.textDim,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Pin Pengingat Task',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Kunci daftar tugas di atas bar notifikasi HP Anda',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Switch(
+                value: isEnabled,
+                activeThumbColor: AppColors.blueAccent,
+                activeTrackColor: AppColors.blueAccent.withValues(alpha: 0.3),
+                inactiveThumbColor: AppColors.textDim,
+                inactiveTrackColor: AppColors.bgCardAlt,
+                onChanged: (val) {
+                  settingsProvider.setTaskReminder(
+                    enabled: val,
+                    tasks: tasks,
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
